@@ -20,73 +20,99 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* 今日專屬發光外框動畫 */
+        .glow-today {
+            box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6);
+            border-color: #facc15 !important;
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        /* 打勾後的視覺變化 */
+        .task-completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background-color: #f9fafb !important;
+            border-color: #e5e7eb !important;
+            color: #9ca3af !important;
+        }
+        /* 自定義彈出視窗動畫 */
+        .modal-enter-active, .modal-leave-active {
+            transition: all 0.3s ease;
+        }
+        .modal-enter-from, .modal-leave-to {
+            opacity: 0;
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased">
 
 <div id="app" class="min-h-screen pb-12">
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    <!-- Header (滿版優化) -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="w-full px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-black tracking-wider"><i class="fas fa-trophy text-yellow-400 mr-2"></i>道明國二下 前三名衝刺計畫</h1>
-                <p class="text-blue-100 text-sm mt-1">執行期間：3/25 ～ 5/4 (共 41 天) | 核心戰略：艾賓浩斯記憶法</p>
+                <p class="text-blue-100 text-sm mt-1">執行期間：3/25 ～ 5/4 | <i class="fas fa-magic text-yellow-300 mx-1"></i> 今日進度會發出黃色螢光</p>
             </div>
-            <div class="flex flex-wrap gap-2 text-xs font-bold">
+            <div class="flex flex-wrap justify-center gap-2 text-xs font-bold">
                 <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded shadow-sm border border-blue-200">數學</span>
                 <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded shadow-sm border border-purple-200">理化</span>
                 <span class="bg-red-100 text-red-800 px-2 py-1 rounded shadow-sm border border-red-200">英文</span>
                 <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded shadow-sm border border-orange-200">國文</span>
                 <span class="bg-green-100 text-green-800 px-2 py-1 rounded shadow-sm border border-green-200">社會</span>
                 <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded shadow-sm border border-yellow-200"><i class="fas fa-chalkboard-teacher mr-1"></i>家教</span>
-                <span class="bg-teal-100 text-teal-800 px-2 py-1 rounded shadow-sm border border-teal-200"><i class="fas fa-brain mr-1"></i>艾賓浩斯</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Content (滿版優化，縮小留白) -->
+    <main class="w-full px-3 md:px-5 lg:px-8 py-6">
         
-        <!-- Stage Filter/Tabs (Optional visual indicator) -->
-        <div class="mb-8 flex space-x-2 overflow-x-auto hide-scrollbar pb-2">
-            <div v-for="(stage, index) in stages" :key="index" 
-                 class="px-4 py-2 rounded-full whitespace-nowrap font-bold text-sm shadow-sm border"
-                 :class="stage.colorClass">
-                {{ stage.name }}
-            </div>
-        </div>
-
         <!-- Weeks Grid -->
-        <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-12">
-            <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center border-b pb-2">
+        <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
+            <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center border-b-2 border-indigo-200 pb-2">
                 <i class="fas fa-calendar-week mr-2 text-indigo-500"></i> {{ week.title }}
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            
+            <!-- 針對橫式螢幕優化：使用 grid-cols-2 到 grid-cols-5，讓卡片更緊湊 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 
                 <!-- Day Card -->
                 <div v-for="day in week.days" :key="day.date" 
-                     class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border-t-4"
-                     :class="getDayBorderColor(day.dayOfWeek, day.date)">
+                     @click="openModal(day)"
+                     class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
+                     :class="[getDayBorderColor(day.dayOfWeek, day.date), isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '']">
                     
                     <!-- Card Header -->
-                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                        <div class="font-bold text-gray-800 text-lg">
-                            {{ day.date }} <span class="text-sm text-gray-500 ml-1">({{ day.dayOfWeek }})</span>
+                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center shrink-0">
+                        <div class="font-bold text-gray-800 text-lg flex items-center">
+                            {{ day.date }} <span class="text-sm text-gray-500 ml-1 mr-2">({{ day.dayOfWeek }})</span>
+                            <span v-if="isToday(day.date)" class="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full animate-pulse">今日</span>
                         </div>
-                        <div v-if="day.isHoliday" class="text-xs font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
+                        <div v-if="day.isHoliday" class="text-xs font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full shadow-sm">
                             假日黃金期
                         </div>
                     </div>
 
                     <!-- Card Body (Events) -->
-                    <div class="p-3 space-y-2">
+                    <div class="p-2 space-y-2 flex-grow overflow-y-auto max-h-[300px] hide-scrollbar">
                         <div v-for="(event, eIndex) in day.events" :key="eIndex" 
-                             class="text-sm flex flex-col p-2 rounded border"
-                             :class="getEventStyle(event.desc)">
-                            <div class="font-mono text-xs font-semibold opacity-70 mb-1 flex items-center">
-                                <i class="far fa-clock mr-1"></i> {{ event.time }}
+                             class="text-sm flex flex-row p-2 rounded border transition-colors duration-200"
+                             :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
+                            
+                            <!-- Checkbox (使用 .stop 防止觸發卡片的點擊事件打開彈窗) -->
+                            <div class="pt-0.5 mr-2">
+                                <input type="checkbox" v-model="event.completed" @click.stop 
+                                       class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
                             </div>
-                            <div class="font-medium leading-tight" v-html="formatDesc(event.desc)"></div>
+
+                            <div class="flex-grow flex flex-col">
+                                <div class="font-mono text-xs font-semibold opacity-70 mb-1 flex items-center">
+                                    <i class="far fa-clock mr-1"></i> {{ event.time }}
+                                </div>
+                                <div class="font-medium leading-relaxed tracking-wide" v-html="formatDesc(event.desc)"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,13 +120,64 @@
             </div>
         </div>
     </main>
+
+    <!-- 彈出式閱讀視窗 (Modal) -->
+    <transition name="modal">
+        <div v-if="selectedDay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+                
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center" :class="getModalHeaderColor(selectedDay)">
+                    <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-calendar-day mr-3 opacity-70"></i>
+                        {{ selectedDay.date }} ({{ selectedDay.dayOfWeek }}) 詳細進度
+                        <span v-if="selectedDay.isHoliday" class="ml-3 text-sm font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full">假日黃金期</span>
+                        <span v-if="isToday(selectedDay.date)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">✨ 就是今天</span>
+                    </h3>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 overflow-y-auto flex-grow bg-gray-50 space-y-4">
+                    <div v-for="(event, eIndex) in selectedDay.events" :key="eIndex" 
+                         class="flex p-4 rounded-xl border-2 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer"
+                         :class="[getEventStyle(event.desc), event.completed ? 'task-completed opacity-70 scale-[0.98]' : 'bg-white']"
+                         @click="event.completed = !event.completed">
+                        
+                        <!-- Checkbox 放大版 -->
+                        <div class="flex items-center justify-center mr-4">
+                            <input type="checkbox" v-model="event.completed" @click.stop 
+                                   class="w-6 h-6 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer pointer-events-none">
+                        </div>
+
+                        <div class="flex flex-col justify-center">
+                            <div class="font-mono text-sm font-bold opacity-75 text-gray-600 mb-1 flex items-center">
+                                <i class="far fa-clock text-indigo-400 mr-2"></i> {{ event.time }}
+                            </div>
+                            <div class="text-lg font-bold leading-relaxed" v-html="formatDesc(event.desc)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-white text-center">
+                    <button @click="closeModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                        確認並關閉
+                    </button>
+                </div>
+            </div>
+        </div>
+    </transition>
+
 </div>
 
 <script>
     const { createApp } = Vue;
 
-    // Helper function to parse raw text into structured events
-    const rawSchedule = [
+    // 將 M 代碼全部翻譯為直覺科目名稱
+    const rawScheduleText = [
         // Week 1
         { date: "3/25", day: "三", events: [
             { time: "18:30-21:30", desc: "第一次段考後放鬆，整理房間與準備文具" },
@@ -108,106 +185,106 @@
         ]},
         { date: "3/26", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-22:00", desc: "L0 (歷M1, 地M1 - 零散時段)" },
+            { time: "20:00-22:00", desc: "L0 (歷史L3, 地理L3 - 零散時段)" },
             { time: "22:00-22:30", desc: "整理今日筆記" }
         ]},
         { date: "3/27", day: "五", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-22:00", desc: "L0 (公M1, 國M1 - 零散時段)" },
-            { time: "22:00-22:30", desc: "R1 (歷M1, 地M1)" }
+            { time: "20:00-22:00", desc: "L0 (公民L3, 國文(康橋) - 零散時段)" },
+            { time: "22:00-22:30", desc: "R1 (歷史L3, 地理L3)" }
         ]},
         { date: "3/28", day: "六", events: [
             { time: "08:00-18:00", desc: "戶外教學" },
             { time: "18:00-19:00", desc: "晚餐與休息" },
             { time: "19:00-21:00", desc: "國文家教" },
-            { time: "21:30-22:30", desc: "R1 (公M1, 國M1), R2 (歷M1, 地M1)" }
+            { time: "21:30-22:30", desc: "R1 (公民L3, 國文(康橋)), R2 (歷史L3, 地理L3)" }
         ]},
         { date: "3/29", day: "日", events: [
-            { time: "08:00-09:30", desc: "L0 (英M1)" },
+            { time: "08:00-09:30", desc: "L0 (英文L3(單字/課文))" },
             { time: "09:30-12:00", desc: "英文家教" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-15:00", desc: "L0 (歷M2)" },
+            { time: "13:30-15:00", desc: "L0 (歷史L4)" },
             { time: "15:00-16:00", desc: "地科家教" },
-            { time: "16:00-17:30", desc: "L0 (國M2)" },
+            { time: "16:00-17:30", desc: "L0 (國文(陋室銘))" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "學校功課與週記" },
-            { time: "21:00-22:00", desc: "R2 (公M1, 國M1)" }
+            { time: "21:00-22:00", desc: "R2 (公民L3, 國文(康橋))" }
         ]},
         // Week 2
         { date: "3/30", day: "一", events: [
-            { time: "18:30-21:30", desc: "L0 (數M1, 理M1 - 長時間學習)" },
-            { time: "21:30-22:30", desc: "R1 (英M1, 歷M2, 國M2), R4 (歷M1, 地M1)" }
+            { time: "18:30-21:30", desc: "L0 (數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼))" },
+            { time: "21:30-22:30", desc: "R1 (英文L3(單字/課文), 歷史L4, 國文(陋室銘)), R4 (歷史L3, 地理L3)" }
         ]},
         { date: "3/31", day: "二", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-22:00", desc: "L0 (地M2, 公M2 - 零散時段)" },
-            { time: "22:00-22:30", desc: "R1 (數M1, 理M1), R4 (公M1, 國M1)" }
+            { time: "20:00-22:00", desc: "L0 (地理L4, 公民L4 - 零散時段)" },
+            { time: "22:00-22:30", desc: "R1 (數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼)), R4 (公民L3, 國文(康橋))" }
         ]},
         { date: "4/01", day: "三", events: [
-            { time: "18:30-21:30", desc: "L0 (數M2, 理M2 - 長時間學習)" },
-            { time: "21:30-22:30", desc: "R1 (地M2, 公M2), R2 (數M1, 理M1), R7 (歷M1, 地M1)" }
+            { time: "18:30-21:30", desc: "L0 (數學(3-3全等), 理化(3-3酸鹼性/3-4中和))" },
+            { time: "21:30-22:30", desc: "R1 (地理L4, 公民L4), R2 (數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼)), R7 (歷史L3, 地理L3)" }
         ]},
         { date: "4/02", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-22:00", desc: "L0 (國M3, 英M2)" },
-            { time: "22:00-22:30", desc: "R1 (數M2, 理M2), R4 (英M1, 歷M2), R7 (公M1)" }
+            { time: "20:00-22:00", desc: "L0 (國文(森林), 英文L3(文法))" },
+            { time: "22:00-22:30", desc: "R1 (數學(3-3全等), 理化(3-3酸鹼性/3-4中和)), R4 (英文L3(單字/課文), 歷史L4), R7 (公民L3)" }
         ]},
         { date: "4/03", day: "五", events: [
-            { time: "08:00-12:00", desc: "L0 (國M4, 英M3) 及 數理進階演練" },
+            { time: "08:00-12:00", desc: "L0 (國文(題詞/柬帖), 英文L4(單字/課文)) 及 數理進階演練" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-17:30", desc: "R2 (數M2, 理M2), R4 (數M1, 理M1)" },
+            { time: "13:30-17:30", desc: "R2 (數學(3-3全等), 理化(3-3酸鹼性/3-4中和)), R4 (數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼))" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "學校作業 / 國文語感練習" },
-            { time: "21:30-22:30", desc: "R1 (國M3, 英M2), R7 (國M1)" }
+            { time: "21:30-22:30", desc: "R1 (國文(森林), 英文L3(文法)), R7 (國文(康橋))" }
         ]},
         { date: "4/04", day: "六", events: [
-            { time: "08:00-12:00", desc: "L0 (數M3, 理M3)" },
+            { time: "08:00-12:00", desc: "L0 (數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡))" },
             { time: "12:00-13:30", desc: "午餐與午休" },
             { time: "13:30-14:00", desc: "準備家教" },
             { time: "14:00-17:30", desc: "理化家教" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "國文家教" },
-            { time: "21:30-22:30", desc: "R1 (國M4, 英M3), R4 (地M2, 公M2)" }
+            { time: "21:30-22:30", desc: "R1 (國文(題詞/柬帖), 英文L4(單字/課文)), R4 (地理L4, 公民L4)" }
         ]},
         { date: "4/05", day: "日", events: [
-            { time: "08:00-09:30", desc: "L0 (英M4)" },
+            { time: "08:00-09:30", desc: "L0 (英文L4(文法))" },
             { time: "09:30-12:00", desc: "英文家教" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-15:00", desc: "L0 (國M5)" },
+            { time: "13:30-15:00", desc: "L0 (國文(文言文49-51))" },
             { time: "15:00-16:00", desc: "地科家教" },
-            { time: "16:00-17:30", desc: "L0 (國M6)" },
+            { time: "16:00-17:30", desc: "L0 (國文(文言文52-54))" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "寫學校功課" },
-            { time: "21:00-22:30", desc: "R1 (數M3, 理M3), R4 (數M2, 理M2)" }
+            { time: "21:00-22:30", desc: "R1 (數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡)), R4 (數學(3-3全等), 理化(3-3酸鹼性/3-4中和))" }
         ]},
         // Week 3
         { date: "4/06", day: "一", events: [
-            { time: "08:00-12:00", desc: "L0 (數M4) & 數學/理化 長時間刷題特訓" },
+            { time: "08:00-12:00", desc: "L0 (數學(3-5邊角關係)) & 數學/理化 長時間刷題特訓" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-17:30", desc: "R2 (數M3, 理M3), R7 (歷M2, 英M1, 數M1, 理M1)" },
+            { time: "13:30-17:30", desc: "R2 (數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡)), R7 (歷史L4, 英文L3(單字/課文), 數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼))" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:30", desc: "社會/語文 彈性複習" },
-            { time: "21:30-22:30", desc: "R1 (英M4, 國M5, 國M6)" }
+            { time: "21:30-22:30", desc: "R1 (英文L4(文法), 國文(文言文49-51), 國文(文言文52-54))" }
         ]},
         { date: "4/07", day: "二", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-22:00", desc: "社會科複習 (歷/地/公 錯題 - 零散時段)" },
-            { time: "22:00-22:30", desc: "R1 (數M4), R4 (國M4, 英M3)" }
+            { time: "22:00-22:30", desc: "R1 (數學(3-5邊角關係)), R4 (國文(題詞/柬帖), 英文L4(單字/課文))" }
         ]},
         { date: "4/08", day: "三", events: [
             { time: "18:30-21:30", desc: "數學/理化 長時間刷題特訓" },
-            { time: "21:30-22:30", desc: "R2 (數M4), R4 (數M3, 理M3), R7 (地M2, 公M2, 數M2, 理M2)" }
+            { time: "21:30-22:30", desc: "R2 (數學(3-5邊角關係)), R4 (數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡)), R7 (地理L4, 公民L4, 數學(3-3全等), 理化(3-3酸鹼性/3-4中和))" }
         ]},
         { date: "4/09", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-21:30", desc: "R15 (歷M1, 地M1) 寫綜合卷" },
-            { time: "21:30-22:30", desc: "R4 (英M4, 國M5, 國M6)" }
+            { time: "20:00-21:30", desc: "R15 (歷史L3, 地理L3) 寫綜合卷" },
+            { time: "21:30-22:30", desc: "R4 (英文L4(文法), 國文(文言文49-51), 國文(文言文52-54))" }
         ]},
         { date: "4/10", day: "五", events: [
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-21:30", desc: "R15 (公M1, 國M1)" },
-            { time: "21:30-22:30", desc: "R4 (數M4) & 針對數學家教教的錯題重算" }
+            { time: "20:00-21:30", desc: "R15 (公民L3, 國文(康橋))" },
+            { time: "21:30-22:30", desc: "R4 (數學(3-5邊角關係)) & 針對數學家教教的錯題重算" }
         ]},
         { date: "4/11", day: "六", events: [
             { time: "08:00-12:00", desc: "數理弱點單元加強" },
@@ -216,41 +293,41 @@
             { time: "14:00-17:30", desc: "理化家教" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "國文家教" },
-            { time: "21:30-22:30", desc: "R7 (國M4, 英M3, 數M3, 理M3)" }
+            { time: "21:30-22:30", desc: "R7 (國文(題詞/柬帖), 英文L4(單字/課文), 數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡))" }
         ]},
         { date: "4/12", day: "日", events: [
-            { time: "08:00-09:30", desc: "社會科總覽(歷/地)" },
+            { time: "08:00-09:30", desc: "社會科總覽(歷史/地理)" },
             { time: "09:30-12:00", desc: "英文家教" },
             { time: "12:00-13:30", desc: "午餐與午休" },
             { time: "13:30-15:00", desc: "社會科總覽(公民)" },
             { time: "15:00-16:00", desc: "地科家教" },
             { time: "16:00-17:30", desc: "社會科小範圍複習" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
-            { time: "19:00-21:00", desc: "R15 (英M1, 歷M2, 國M2)" }
+            { time: "19:00-21:00", desc: "R15 (英文L3(單字/課文), 歷史L4, 國文(陋室銘))" }
         ]},
         // Week 4
         { date: "4/13", day: "一", events: [
             { time: "18:30-21:30", desc: "狂刷數學/理化題本，建立錯題本" },
-            { time: "21:30-22:30", desc: "R7 (國M5, 國M6, 數M4)" }
+            { time: "21:30-22:30", desc: "R7 (國文(文言文49-51), 國文(文言文52-54), 數學(3-5邊角關係))" }
         ]},
         { date: "4/14", day: "二", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "狂刷國文/英文題本" },
-            { time: "21:30-22:30", desc: "R15 (數M1, 理M1)" }
+            { time: "21:30-22:30", desc: "R15 (數學(3-1內外角/3-2作圖), 理化(3-1電解質/3-2酸鹼))" }
         ]},
         { date: "4/15", day: "三", events: [
             { time: "18:30-21:30", desc: "二刷理化、數學錯題本" },
-            { time: "21:30-22:30", desc: "R15 (國M3), R7 (英M4)" }
+            { time: "21:30-22:30", desc: "R15 (國文(森林)), R7 (英文L4(文法))" }
         ]},
         { date: "4/16", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "社會科三科刷題與背誦" },
-            { time: "21:30-22:30", desc: "R15 (英M2, 歷M2, 數M2, 理M2)" }
+            { time: "21:30-22:30", desc: "R15 (英文L3(文法), 歷史L4, 數學(3-3全等), 理化(3-3酸鹼性/3-4中和))" }
         ]},
         { date: "4/17", day: "五", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "理化酸鹼中和/速率特訓" },
-            { time: "21:30-22:30", desc: "R15 (地M2)" }
+            { time: "21:30-22:30", desc: "R15 (地理L4)" }
         ]},
         { date: "4/18", day: "六", events: [
             { time: "08:00-12:00", desc: "數理歷屆試題(一)" },
@@ -259,7 +336,7 @@
             { time: "14:00-17:30", desc: "理化家教" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "國文家教" },
-            { time: "21:30-22:30", desc: "R15 (公M2)" }
+            { time: "21:30-22:30", desc: "R15 (公民L4)" }
         ]},
         { date: "4/19", day: "日", events: [
             { time: "08:00-09:30", desc: "訂正歷屆試題" },
@@ -269,26 +346,26 @@
             { time: "15:00-16:00", desc: "地科家教" },
             { time: "16:00-17:30", desc: "社會科歷屆試題" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
-            { time: "19:00-21:00", desc: "R15 (數M3, 理M3, 國M4)" }
+            { time: "19:00-21:00", desc: "R15 (數學(3-4中垂線/角平分線), 理化(4-1速率/4-2平衡), 國文(題詞/柬帖))" }
         ]},
         // Week 5
         { date: "4/20", day: "一", events: [
             { time: "18:30-21:30", desc: "數學幾何證明/理化計算 深度演練" },
-            { time: "21:30-22:30", desc: "R15 (英M3)" }
+            { time: "21:30-22:30", desc: "R15 (英文L4(單字/課文))" }
         ]},
         { date: "4/21", day: "二", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "國文應用文/文言文特訓" },
-            { time: "21:30-22:30", desc: "R15 (數M4, 國M5)" }
+            { time: "21:30-22:30", desc: "R15 (數學(3-5邊角關係), 國文(文言文49-51))" }
         ]},
         { date: "4/22", day: "三", events: [
             { time: "18:30-21:30", desc: "數理歷屆試題演練(二)" },
-            { time: "21:30-22:30", desc: "R15 (國M6)" }
+            { time: "21:30-22:30", desc: "R15 (國文(文言文52-54))" }
         ]},
         { date: "4/23", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "訂正歷屆試題" },
-            { time: "21:30-22:30", desc: "R15 (英M4)" }
+            { time: "21:30-22:30", desc: "R15 (英文L4(文法))" }
         ]},
         { date: "4/24", day: "五", events: [
             { time: "19:00-20:00", desc: "數學家教" },
@@ -322,7 +399,7 @@
             { time: "20:00-22:30", desc: "國文注釋、題詞柬帖、英文單字全默寫一次" }
         ]},
         { date: "4/29", day: "三", events: [
-            { time: "18:30-22:30", desc: "社會科(歷/地/公)課本重翻一次，確認無死角" }
+            { time: "18:30-22:30", desc: "社會科(歷史/地理/公民)課本重翻一次，確認無死角" }
         ]},
         { date: "4/30", day: "四", events: [
             { time: "19:00-20:00", desc: "數學家教" },
@@ -363,26 +440,27 @@
     createApp({
         data() {
             return {
-                stages: [
-                    { name: '🟡 第一階段：黃金吸收期', colorClass: 'bg-yellow-50 text-yellow-700 border-yellow-300' },
-                    { name: '🔵 第二階段：大量刷題', colorClass: 'bg-blue-50 text-blue-700 border-blue-300' },
-                    { name: '🔴 第三階段：考前收網', colorClass: 'bg-red-50 text-red-700 border-red-300' }
-                ]
+                selectedDay: null // 用於控制 Modal 的顯示狀態
             }
         },
         computed: {
             groupedSchedule() {
+                // 將所有 event 預設加上 completed: false 的狀態
+                const scheduleWithState = rawScheduleText.map(day => ({
+                    ...day,
+                    events: day.events.map(e => ({ ...e, completed: false }))
+                }));
+
                 // Grouping by weeks
                 const weeks = [
-                    { title: "第 1 週 (啟動週)", days: rawSchedule.slice(0, 5) },
-                    { title: "第 2 週 (衝刺週)", days: rawSchedule.slice(5, 12) },
-                    { title: "第 3 週 (進度收尾)", days: rawSchedule.slice(12, 19) },
-                    { title: "第 4 週 (狂刷題找盲點)", days: rawSchedule.slice(19, 26) },
-                    { title: "第 5 週 (錯題與模擬考)", days: rawSchedule.slice(26, 33) },
-                    { title: "第 6 週 (終極收網週)", days: rawSchedule.slice(33, 41) }
+                    { title: "第 1 週 (啟動週)", days: scheduleWithState.slice(0, 5) },
+                    { title: "第 2 週 (衝刺週)", days: scheduleWithState.slice(5, 12) },
+                    { title: "第 3 週 (進度收尾)", days: scheduleWithState.slice(12, 19) },
+                    { title: "第 4 週 (狂刷題找盲點)", days: scheduleWithState.slice(19, 26) },
+                    { title: "第 5 週 (錯題與模擬考)", days: scheduleWithState.slice(26, 33) },
+                    { title: "第 6 週 (終極收網週)", days: scheduleWithState.slice(33, 41) }
                 ];
                 
-                // Add weekend flag
                 const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
                 weeks.forEach(w => w.days.forEach(d => {
                     d.isHoliday = d.day === '六' || d.day === '日' || holidays.includes(d.date);
@@ -392,31 +470,54 @@
             }
         },
         methods: {
+            openModal(day) {
+                this.selectedDay = day;
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            },
+            closeModal() {
+                this.selectedDay = null;
+                document.body.style.overflow = 'auto'; // 恢復背景滾動
+            },
+            isToday(dateStr) {
+                const today = new Date();
+                const mm = today.getMonth() + 1;
+                const dd = String(today.getDate()).padStart(2, '0');
+                // 將今天格式化成如 "3/25" (月不補零，日補零對齊資料庫)
+                const formattedToday = `${mm}/${dd}`;
+                
+                // Demo 環境：如果發現今天是計畫外日期(例如現在是3/24)，您可以將 return 寫死成 dateStr === '3/25' 來預覽
+                return dateStr === formattedToday;
+            },
             getDayBorderColor(day, date) {
                 const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
-                if (day === '六' || day === '日' || holidays.includes(date)) return 'border-pink-400';
-                return 'border-indigo-400';
+                if (day === '六' || day === '日' || holidays.includes(date)) return 'border-pink-300 bg-pink-50/20';
+                return 'border-indigo-300';
+            },
+            getModalHeaderColor(day) {
+                if(this.isToday(day.date)) return 'bg-yellow-100';
+                if(day.isHoliday) return 'bg-pink-50';
+                return 'bg-indigo-50';
             },
             getEventStyle(desc) {
-                // Logic to assign colors based on keywords in description
+                // 自動偵測內文並給予專屬顏色
                 if (desc.includes('數學') && !desc.includes('家教')) return 'bg-blue-50 border-blue-200 text-blue-800';
                 if (desc.includes('理化') && !desc.includes('家教')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文') && !desc.includes('家教')) return 'bg-red-50 border-red-200 text-red-800';
                 if (desc.includes('國文') && !desc.includes('家教')) return 'bg-orange-50 border-orange-200 text-orange-800';
-                if (desc.includes('歷') || desc.includes('地') || desc.includes('公') || desc.includes('社會')) return 'bg-green-50 border-green-200 text-green-800';
+                if (desc.includes('歷史') || desc.includes('地理') || desc.includes('公民') || desc.includes('社會')) return 'bg-green-50 border-green-200 text-green-800';
                 
                 if (desc.includes('家教')) return 'bg-yellow-50 border-yellow-300 text-yellow-800 font-bold';
                 
-                if (desc.includes('R1') || desc.includes('R2') || desc.includes('R4') || desc.includes('R7') || desc.includes('R15') || desc.includes('L0')) return 'bg-teal-50 border-teal-200 text-teal-800';
+                if (desc.includes('R1') || desc.includes('R2') || desc.includes('R4') || desc.includes('R7') || desc.includes('R15') || desc.includes('L0')) return 'bg-teal-50 border-teal-200 text-teal-900';
                 
-                if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動')) return 'bg-gray-100 border-gray-200 text-gray-600 border-dashed';
+                if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動')) return 'bg-gray-100 border-gray-200 text-gray-500 border-dashed';
 
                 return 'bg-white border-gray-200 text-gray-700'; // default
             },
             formatDesc(desc) {
-                // Bold module tags for better readability
-                let formatted = desc.replace(/(L0|R1|R2|R4|R7|R15)/g, '<span class="font-bold border-b border-current pb-px">$1</span>');
-                formatted = formatted.replace(/(數M\d|理M\d|英M\d|國M\d|歷M\d|地M\d|公M\d)/g, '<span class="font-bold">$1</span>');
+                // 自動替換並加粗關鍵字，讓閱讀更清晰
+                let formatted = desc.replace(/(L0|R1|R2|R4|R7|R15)/g, '<span class="font-black text-indigo-700 bg-indigo-100 px-1 rounded">$1</span>');
+                formatted = formatted.replace(/(數學|理化|英文|國文|歷史|地理|公民)/g, '<span class="font-bold">$1</span>');
                 return formatted;
             }
         }
