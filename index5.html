@@ -58,32 +58,16 @@
             </div>
             
             <!-- 使用者登入區塊 -->
-            <div class="bg-white/10 p-2 px-4 rounded-xl backdrop-blur-sm border border-white/20 flex flex-col justify-center items-center gap-2">
+            <div class="bg-white/10 p-2 px-4 rounded-xl backdrop-blur-sm border border-white/20 flex flex-col md:flex-row items-center gap-3">
                 <template v-if="!isLoggedIn">
-                    <!-- 第一排：輸入框與登入按鈕 -->
-                    <div class="flex flex-col md:flex-row items-center gap-3 w-full justify-center">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-user-circle text-xl text-yellow-300"></i>
-                            <input v-model="userNameInput" @keyup.enter="login" type="text" placeholder="輸入姓名登入" class="px-3 py-1.5 text-sm text-gray-800 rounded outline-none w-32 md:w-40 focus:ring-2 focus:ring-yellow-400 font-bold transition-all">
-                        </div>
-                        
-                        <!-- 動態按鈕：輸入文字後會發光變亮 -->
-                        <button @click="login" :disabled="isLoggingIn || !isFirebaseReady || !userNameInput.trim()" 
-                                class="px-4 py-1.5 rounded font-bold text-sm shadow transition-all duration-300 whitespace-nowrap"
-                                :class="(userNameInput.trim() && isFirebaseReady && !isLoggingIn) ? 'bg-yellow-400 hover:bg-yellow-300 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.6)] scale-105' : 'bg-white/20 text-white/50 border border-white/20 cursor-not-allowed'">
-                            <span v-if="isLoggingIn"><i class="fas fa-spinner fa-spin mr-1"></i>連線中</span>
-                            <span v-else><i class="fas fa-sign-in-alt mr-1"></i>登入存檔</span>
-                        </button>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-user-circle text-xl text-yellow-300"></i>
+                        <input v-model="userNameInput" @keyup.enter="login" type="text" placeholder="輸入姓名登入" class="px-3 py-1.5 text-sm text-gray-800 rounded outline-none w-32 md:w-40 focus:ring-2 focus:ring-yellow-400 font-bold">
                     </div>
-
-                    <!-- 第二排：快速登入名單 (只要有歷史紀錄就顯示) -->
-                    <div v-if="historicalUsers.length > 0" class="flex flex-wrap items-center justify-center gap-2 mt-1 pt-2 border-t border-white/10 w-full">
-                        <span class="text-white/80 text-xs font-bold"><i class="fas fa-bolt text-yellow-400 mr-1"></i>快速登入:</span>
-                        <button v-for="user in historicalUsers" :key="user" @click="quickLogin(user)" 
-                                class="text-xs bg-white/20 hover:bg-white/40 text-white px-3 py-1 rounded-full transition-colors border border-white/30 shadow-sm">
-                            {{ user }}
-                        </button>
-                    </div>
+                    <button @click="login" :disabled="isLoggingIn || !isFirebaseReady" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-4 py-1.5 rounded font-bold text-sm shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                        <span v-if="isLoggingIn"><i class="fas fa-spinner fa-spin mr-1"></i>連線中</span>
+                        <span v-else><i class="fas fa-sign-in-alt mr-1"></i>登入存檔</span>
+                    </button>
                 </template>
                 <template v-else>
                     <div class="flex items-center gap-3">
@@ -634,8 +618,7 @@
                 userNameInput: '',
                 currentUser: '',
                 isLoggedIn: false,
-                isLoggingIn: false,
-                historicalUsers: [] // 新增：儲存曾登入過的歷史使用者
+                isLoggingIn: false
             }
         },
         computed: {
@@ -670,17 +653,7 @@
                     
                     isFirebaseReady = true;
 
-                    // 讀取歷史登入名單
-                    const savedHistory = localStorage.getItem('schedule_historical_users');
-                    if (savedHistory) {
-                        try {
-                            this.historicalUsers = JSON.parse(savedHistory);
-                        } catch (e) {
-                            this.historicalUsers = [];
-                        }
-                    }
-
-                    // 檢查 LocalStorage 是否已經有存過最後一次登入的名字
+                    // 檢查 LocalStorage 是否已經有存過名字
                     const savedUser = localStorage.getItem('schedule_user_name');
                     if (savedUser) {
                         this.userNameInput = savedUser;
@@ -722,23 +695,12 @@
                     this.isLoggedIn = true;
                     localStorage.setItem('schedule_user_name', this.currentUser);
 
-                    // 將名字加入快速登入的歷史名單中
-                    if (!this.historicalUsers.includes(this.currentUser)) {
-                        this.historicalUsers.push(this.currentUser);
-                        localStorage.setItem('schedule_historical_users', JSON.stringify(this.historicalUsers));
-                    }
-
                 } catch (error) {
                     console.error("登入儲存失敗:", error);
                     alert("登入失敗，請稍後再試。");
                 } finally {
                     this.isLoggingIn = false;
                 }
-            },
-            quickLogin(name) {
-                // 快速登入功能
-                this.userNameInput = name;
-                this.login();
             },
             logout() {
                 this.isLoggedIn = false;
