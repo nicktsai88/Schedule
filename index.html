@@ -561,26 +561,27 @@
 
     createApp({
         data() {
+            // 將所有 event 預設加上 completed: false 的狀態，並正式存入 data() 中，讓 Vue 啟動響應式追蹤
+            const scheduleWithState = rawScheduleText.map(day => ({
+                ...day,
+                events: day.events.map(e => ({ ...e, completed: false }))
+            }));
+
             return {
-                selectedDay: null // 用於控制 Modal 的顯示狀態
+                selectedDay: null, // 用於控制 Modal 的顯示狀態
+                scheduleData: scheduleWithState // 真正的響應式資料來源
             }
         },
         computed: {
             groupedSchedule() {
-                // 將所有 event 預設加上 completed: false 的狀態
-                const scheduleWithState = rawScheduleText.map(day => ({
-                    ...day,
-                    events: day.events.map(e => ({ ...e, completed: false }))
-                }));
-
-                // Grouping by weeks
+                // Grouping by weeks (改為讀取 this.scheduleData)
                 const weeks = [
-                    { title: "第 1 週 (啟動週)", days: scheduleWithState.slice(0, 5) },
-                    { title: "第 2 週 (衝刺週)", days: scheduleWithState.slice(5, 12) },
-                    { title: "第 3 週 (進度收尾)", days: scheduleWithState.slice(12, 19) },
-                    { title: "第 4 週 (狂刷題找盲點)", days: scheduleWithState.slice(19, 26) },
-                    { title: "第 5 週 (錯題與模擬考)", days: scheduleWithState.slice(26, 33) },
-                    { title: "第 6 週 (終極收網週)", days: scheduleWithState.slice(33, 41) }
+                    { title: "第 1 週 (啟動週)", days: this.scheduleData.slice(0, 5) },
+                    { title: "第 2 週 (衝刺週)", days: this.scheduleData.slice(5, 12) },
+                    { title: "第 3 週 (進度收尾)", days: this.scheduleData.slice(12, 19) },
+                    { title: "第 4 週 (狂刷題找盲點)", days: this.scheduleData.slice(19, 26) },
+                    { title: "第 5 週 (錯題與模擬考)", days: this.scheduleData.slice(26, 33) },
+                    { title: "第 6 週 (終極收網週)", days: this.scheduleData.slice(33, 41) }
                 ];
                 
                 const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
