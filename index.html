@@ -614,8 +614,8 @@
                 const formattedToday = `${mm}/${dd}`;
                 const formattedCardDate = this.getFormattedDate(dateStr);
                 
-                // Demo 環境：預設為 3/25，若實際日期為計畫內則點亮實際日期
-                return formattedCardDate === formattedToday || (formattedToday < '03/25' && formattedCardDate === '03/25');
+                // 修正：移除 Demo 展示邏輯，嚴格比對當前真實日期
+                return formattedCardDate === formattedToday;
             },
             isPast(dateStr) {
                 const today = new Date();
