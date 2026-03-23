@@ -82,11 +82,7 @@
                 <div v-for="day in week.days" :key="day.date" 
                      @click="openModal(day)"
                      class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
-                     :class="[
-                         getDayBorderColor(day.dayOfWeek, day.date), 
-                         isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '',
-                         isPast(day.date) && !isToday(day.date) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
-                     ]">
+                     :class="[getDayBorderColor(day.dayOfWeek, day.date), isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '']">
                     
                     <!-- Card Header -->
                     <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center shrink-0">
@@ -600,34 +596,15 @@
                 this.selectedDay = null;
                 document.body.style.overflow = 'auto'; // 恢復背景滾動
             },
-            getFormattedDate(dateStr) {
-                // 將 "3/25" 轉換成 "03/25" 以便進行準確的字串比對
-                const parts = dateStr.split('/');
-                const mm = parts[0].padStart(2, '0');
-                const dd = parts[1].padStart(2, '0');
-                return `${mm}/${dd}`;
-            },
             isToday(dateStr) {
                 const today = new Date();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const mm = today.getMonth() + 1;
                 const dd = String(today.getDate()).padStart(2, '0');
+                // 將今天格式化成如 "3/25" (月不補零，日補零對齊資料庫)
                 const formattedToday = `${mm}/${dd}`;
-                const formattedCardDate = this.getFormattedDate(dateStr);
                 
                 // Demo 環境：預設為 3/25，若實際日期為計畫內則點亮實際日期
-                return formattedCardDate === formattedToday || (formattedToday < '03/25' && formattedCardDate === '03/25');
-            },
-            isPast(dateStr) {
-                const today = new Date();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                const formattedToday = `${mm}/${dd}`;
-                const formattedCardDate = this.getFormattedDate(dateStr);
-
-                // 如果還沒到計畫開始的 3/25，則沒有任何一天是過期的
-                if (formattedToday < '03/25') return false;
-                
-                return formattedCardDate < formattedToday;
+                return dateStr === formattedToday || (formattedToday < '03/25' && dateStr === '3/25');
             },
             getDayBorderColor(day, date) {
                 const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
