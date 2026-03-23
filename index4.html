@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏆 道明中學國二下 第二次段考 前三名衝刺計畫</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
@@ -46,45 +47,26 @@
 </head>
 <body class="text-gray-800 antialiased">
 
-<div id="app" class="min-h-screen pb-12" v-cloak>
-    <!-- Header (含登入功能) -->
+<div id="app" class="min-h-screen pb-12">
+    <!-- Header (滿版優化) -->
     <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
         <div class="w-full px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black tracking-wider flex items-center">
-                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>道明國二下 前三名衝刺計畫
-                </h1>
-                <p class="text-blue-100 text-sm mt-1">執行期間：3/25 ～ 5/4 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
+                <h1 class="text-2xl font-black tracking-wider"><i class="fas fa-trophy text-yellow-400 mr-2"></i>道明國二下 前三名衝刺計畫</h1>
+                <p class="text-blue-100 text-sm mt-1">執行期間：3/25 ～ 5/4 | <i class="fas fa-magic text-yellow-300 mx-1"></i> 今日進度會發出黃色螢光</p>
             </div>
-            
-            <!-- 使用者登入區塊 -->
-            <div class="bg-white/10 p-2 px-4 rounded-xl backdrop-blur-sm border border-white/20 flex flex-col md:flex-row items-center gap-3">
-                <template v-if="!isLoggedIn">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-user-circle text-xl text-yellow-300"></i>
-                        <input v-model="userNameInput" @keyup.enter="login" type="text" placeholder="輸入姓名登入" class="px-3 py-1.5 text-sm text-gray-800 rounded outline-none w-32 md:w-40 focus:ring-2 focus:ring-yellow-400 font-bold">
-                    </div>
-                    <button @click="login" :disabled="isLoggingIn || !isFirebaseReady" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-4 py-1.5 rounded font-bold text-sm shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
-                        <span v-if="isLoggingIn"><i class="fas fa-spinner fa-spin mr-1"></i>連線中</span>
-                        <span v-else><i class="fas fa-sign-in-alt mr-1"></i>登入存檔</span>
-                    </button>
-                </template>
-                <template v-else>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full shadow-inner font-bold text-sm">
-                            <i class="fas fa-check-circle text-green-700"></i>
-                            <span>{{ currentUser }}</span>
-                        </div>
-                        <button @click="logout" class="bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-1.5 rounded font-bold text-xs shadow transition-colors whitespace-nowrap border border-indigo-400">
-                            登出
-                        </button>
-                    </div>
-                </template>
+            <div class="flex flex-wrap justify-center gap-2 text-xs font-bold">
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded shadow-sm border border-blue-200">數學</span>
+                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded shadow-sm border border-purple-200">理化</span>
+                <span class="bg-red-100 text-red-800 px-2 py-1 rounded shadow-sm border border-red-200">英文</span>
+                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded shadow-sm border border-orange-200">國文</span>
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded shadow-sm border border-green-200">社會</span>
+                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded shadow-sm border border-yellow-200"><i class="fas fa-chalkboard-teacher mr-1"></i>家教</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Content (滿版優化，縮小留白) -->
     <main class="w-full px-3 md:px-5 lg:px-8 py-6">
         
         <!-- Weeks Grid -->
@@ -93,11 +75,13 @@
                 <i class="fas fa-calendar-week mr-2 text-indigo-500"></i> {{ week.title }}
             </h2>
             
-            <!-- 日期卡片 -->
+            <!-- 針對橫式螢幕優化：使用 grid-cols-2 到 grid-cols-5，讓卡片更緊湊 -->
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                
+                <!-- Day Card -->
                 <div v-for="day in week.days" :key="day.date" 
                      @click="openModal(day)"
-                     class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative"
+                     class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
                      :class="[
                          getDayBorderColor(day.dayOfWeek, day.date), 
                          isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '',
@@ -117,20 +101,17 @@
 
                     <!-- Card Body (Events) -->
                     <div class="p-2 space-y-2 flex-grow overflow-y-auto max-h-[300px] hide-scrollbar">
-                        <div v-for="(event, eIndex) in day.events" :key="event.id" 
-                             @click.stop="toggleTask(event)"
-                             class="text-sm flex flex-row p-2 rounded border transition-all duration-200 cursor-pointer hover:shadow-sm"
+                        <div v-for="(event, eIndex) in day.events" :key="eIndex" 
+                             class="text-sm flex flex-row p-2 rounded border transition-colors duration-200"
                              :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
                             
-                            <!-- Checkbox -->
+                            <!-- Checkbox (使用 .stop 防止觸發卡片的點擊事件打開彈窗) -->
                             <div class="pt-0.5 mr-2">
-                                <div class="w-5 h-5 rounded border flex items-center justify-center transition-colors duration-200"
-                                     :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
-                                     <i v-if="event.completed" class="fas fa-check text-white text-xs"></i>
-                                </div>
+                                <input type="checkbox" v-model="event.completed" @click.stop 
+                                       class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
                             </div>
 
-                            <div class="flex-grow flex flex-col select-none">
+                            <div class="flex-grow flex flex-col">
                                 <div class="font-mono text-xs font-semibold opacity-70 mb-1 flex items-center">
                                     <i class="far fa-clock mr-1"></i> {{ event.time }}
                                 </div>
@@ -139,6 +120,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
@@ -163,17 +145,15 @@
 
                 <!-- Modal Body -->
                 <div class="p-6 overflow-y-auto flex-grow bg-gray-50 space-y-4">
-                    <div v-for="(event, eIndex) in selectedDay.events" :key="event.id" 
-                         @click="toggleTask(event)"
-                         class="flex p-4 rounded-xl border-2 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer select-none"
-                         :class="[getEventStyle(event.desc), event.completed ? 'task-completed opacity-70 scale-[0.98]' : 'bg-white hover:border-indigo-300']">
+                    <div v-for="(event, eIndex) in selectedDay.events" :key="eIndex" 
+                         class="flex p-4 rounded-xl border-2 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer"
+                         :class="[getEventStyle(event.desc), event.completed ? 'task-completed opacity-70 scale-[0.98]' : 'bg-white']"
+                         @click="event.completed = !event.completed">
                         
                         <!-- Checkbox 放大版 -->
                         <div class="flex items-center justify-center mr-4">
-                            <div class="w-6 h-6 rounded border-2 flex items-center justify-center transition-colors duration-200"
-                                 :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
-                                 <i v-if="event.completed" class="fas fa-check text-white text-sm"></i>
-                            </div>
+                            <input type="checkbox" v-model="event.completed" @click.stop 
+                                   class="w-6 h-6 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer pointer-events-none">
                         </div>
 
                         <div class="flex flex-col justify-center">
@@ -194,32 +174,11 @@
             </div>
         </div>
     </transition>
+
 </div>
 
-<script type="module">
-    // 引入 Vue ES Module 版
-    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-    
-    // 0. Firebase 初始化與設定
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
-    import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
-    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
-
-    // Firebase 設定
-    const firebaseConfig = {
-        apiKey: "AIzaSyAxQFt76ZPXE7d0i1XeNZ1yiiD2WYNIfHs",
-        authDomain: "chinese-learning-47f4d.firebaseapp.com",
-        projectId: "chinese-learning-47f4d",
-        storageBucket: "chinese-learning-47f4d.firebasestorage.app",
-        messagingSenderId: "76289812052",
-        appId: "1:76289812052:web:898384a916f9f341f62fc1"
-    };
-
-    let db, auth;
-    let isFirebaseReady = false;
-    const COLLECTION_NAME = 'Schedule'; 
-    const DOC_GLOBAL = 'UserList'; 
-    let currentUserDocUnsubscribe = null;
+<script>
+    const { createApp } = Vue;
 
     // 將 M 代碼全部翻譯為直覺科目名稱，並極致切分每個單一小時與15分鐘的複習區塊
     const rawScheduleText = [
@@ -600,29 +559,22 @@
         ]}
     ];
 
-    const app = createApp({
+    createApp({
         data() {
-            // 給每個任務產生獨特的 ID，用於 Firebase 辨識與儲存
+            // 將所有 event 預設加上 completed: false 的狀態，並正式存入 data() 中，讓 Vue 啟動響應式追蹤
             const scheduleWithState = rawScheduleText.map(day => ({
                 ...day,
-                events: day.events.map(e => ({ 
-                    ...e, 
-                    id: `${day.date}_${e.time}`, 
-                    completed: false 
-                }))
+                events: day.events.map(e => ({ ...e, completed: false }))
             }));
 
             return {
-                selectedDay: null, 
-                scheduleData: scheduleWithState,
-                userNameInput: '',
-                currentUser: '',
-                isLoggedIn: false,
-                isLoggingIn: false
+                selectedDay: null, // 用於控制 Modal 的顯示狀態
+                scheduleData: scheduleWithState // 真正的響應式資料來源
             }
         },
         computed: {
             groupedSchedule() {
+                // Grouping by weeks (改為讀取 this.scheduleData)
                 const weeks = [
                     { title: "第 1 週 (啟動週)", days: this.scheduleData.slice(0, 5) },
                     { title: "第 2 週 (衝刺週)", days: this.scheduleData.slice(5, 12) },
@@ -640,121 +592,17 @@
                 return weeks;
             }
         },
-        mounted() {
-            this.initFirebase();
-        },
         methods: {
-            async initFirebase() {
-                try {
-                    const firebaseApp = initializeApp(firebaseConfig);
-                    auth = getAuth(firebaseApp);
-                    db = getFirestore(firebaseApp);
-                    await signInAnonymously(auth);
-                    
-                    isFirebaseReady = true;
-
-                    // 檢查 LocalStorage 是否已經有存過名字
-                    const savedUser = localStorage.getItem('schedule_user_name');
-                    if (savedUser) {
-                        this.userNameInput = savedUser;
-                        this.login();
-                    }
-                } catch (error) {
-                    console.error("Firebase 初始化失敗:", error);
-                    alert("連線資料庫失敗，請檢查網路連線。");
-                }
-            },
-            async login() {
-                if (!this.userNameInput.trim() || !isFirebaseReady) return;
-                
-                this.isLoggingIn = true;
-                this.currentUser = this.userNameInput.trim();
-                
-                try {
-                    const userDocRef = doc(db, COLLECTION_NAME, `User_${this.currentUser}`);
-                    const docSnap = await getDoc(userDocRef);
-                    
-                    // 如果這個使用者是第一次登入，就在雲端建立他的檔案
-                    if (!docSnap.exists()) {
-                        await setDoc(userDocRef, { completedTasks: [] });
-                        
-                        // 順便把名字加進全域清單
-                        const globalRef = doc(db, COLLECTION_NAME, DOC_GLOBAL);
-                        await setDoc(globalRef, { users: arrayUnion(this.currentUser) }, { merge: true });
-                    }
-
-                    // 啟動監聽：只要雲端有變化，就即時更新到畫面上
-                    if (currentUserDocUnsubscribe) currentUserDocUnsubscribe();
-                    
-                    currentUserDocUnsubscribe = onSnapshot(userDocRef, (doc) => {
-                        const data = doc.data();
-                        const completedList = data?.completedTasks || [];
-                        this.syncLocalSchedule(completedList);
-                    });
-
-                    this.isLoggedIn = true;
-                    localStorage.setItem('schedule_user_name', this.currentUser);
-
-                } catch (error) {
-                    console.error("登入儲存失敗:", error);
-                    alert("登入失敗，請稍後再試。");
-                } finally {
-                    this.isLoggingIn = false;
-                }
-            },
-            logout() {
-                this.isLoggedIn = false;
-                this.currentUser = '';
-                this.userNameInput = '';
-                localStorage.removeItem('schedule_user_name');
-                if (currentUserDocUnsubscribe) {
-                    currentUserDocUnsubscribe();
-                }
-                // 登出後清空畫面上的打勾紀錄
-                this.syncLocalSchedule([]);
-            },
-            syncLocalSchedule(completedList) {
-                // 將雲端拉下來的打勾清單，更新到現有排程卡片中
-                this.scheduleData.forEach(day => {
-                    day.events.forEach(event => {
-                        event.completed = completedList.includes(event.id);
-                    });
-                });
-            },
-            async toggleTask(event) {
-                // 防呆：如果沒登入就不能打勾
-                if (!this.isLoggedIn) {
-                    alert('⚠️ 請先在上方輸入姓名登入，系統才能幫你儲存打勾進度喔！');
-                    return;
-                }
-
-                // 為了讓使用者感覺反應很快，先在畫面上切換打勾狀態 (Optimistic Update)
-                const isNowCompleted = !event.completed;
-                event.completed = isNowCompleted;
-
-                // 接著背景自動傳送到 Firebase 儲存
-                try {
-                    const userDocRef = doc(db, COLLECTION_NAME, `User_${this.currentUser}`);
-                    if (isNowCompleted) {
-                        await updateDoc(userDocRef, { completedTasks: arrayUnion(event.id) });
-                    } else {
-                        await updateDoc(userDocRef, { completedTasks: arrayRemove(event.id) });
-                    }
-                } catch (error) {
-                    console.error("同步至雲端失敗:", error);
-                    // 如果傳送失敗，就把畫面上的打勾退回原狀
-                    event.completed = !isNowCompleted;
-                }
-            },
             openModal(day) {
                 this.selectedDay = day;
-                document.body.style.overflow = 'hidden'; 
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
             },
             closeModal() {
                 this.selectedDay = null;
-                document.body.style.overflow = 'auto'; 
+                document.body.style.overflow = 'auto'; // 恢復背景滾動
             },
             getFormattedDate(dateStr) {
+                // 將 "3/25" 轉換成 "03/25" 以便進行準確的字串比對
                 const parts = dateStr.split('/');
                 const mm = parts[0].padStart(2, '0');
                 const dd = parts[1].padStart(2, '0');
@@ -767,6 +615,7 @@
                 const formattedToday = `${mm}/${dd}`;
                 const formattedCardDate = this.getFormattedDate(dateStr);
                 
+                // 修正：移除 Demo 展示邏輯，嚴格比對當前真實日期
                 return formattedCardDate === formattedToday;
             },
             isPast(dateStr) {
@@ -776,6 +625,7 @@
                 const formattedToday = `${mm}/${dd}`;
                 const formattedCardDate = this.getFormattedDate(dateStr);
 
+                // 如果還沒到計畫開始的 3/25，則沒有任何一天是過期的
                 if (formattedToday < '03/25') return false;
                 
                 return formattedCardDate < formattedToday;
@@ -791,6 +641,7 @@
                 return 'bg-indigo-50';
             },
             getEventStyle(desc) {
+                // 自動偵測內文並給予專屬顏色
                 if (desc.includes('數學') && !desc.includes('家教')) return 'bg-blue-50 border-blue-200 text-blue-800';
                 if (desc.includes('理化') && !desc.includes('家教')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文') && !desc.includes('家教')) return 'bg-red-50 border-red-200 text-red-800';
@@ -803,18 +654,17 @@
                 
                 if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動') || desc.includes('平靜心情')) return 'bg-gray-100 border-gray-200 text-gray-500 border-dashed';
 
-                return 'bg-white border-gray-200 text-gray-700'; 
+                return 'bg-white border-gray-200 text-gray-700'; // default
             },
             formatDesc(desc) {
+                // 自動替換並加粗關鍵字，讓閱讀更清晰
+                // 將 R15 放在 R1 之前，避免 Regex 錯誤配對
                 let formatted = desc.replace(/(L0|R15|R1|R2|R4|R7)/g, '<span class="font-black text-indigo-700 bg-indigo-100 px-1 rounded">$1</span>');
                 formatted = formatted.replace(/(數學|理化|英文|國文|歷史|地理|公民)/g, '<span class="font-bold">$1</span>');
                 return formatted;
             }
         }
-    });
-
-    // 啟動 Vue
-    app.mount('#app');
+    }).mount('#app')
 </script>
 </body>
 </html>
