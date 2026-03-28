@@ -789,7 +789,11 @@
                 return 'bg-white border-gray-200 text-gray-700'; 
             },
             formatDesc(desc) {
-                let formatted = desc.replace(/(新學習|複習[1-5]|複習|回顧|統整|刷題|演練|測驗|計時模擬考)/g, '<span class="font-black text-indigo-700 bg-indigo-100 px-1 rounded">$1</span>');
+                // 將「新學習」獨立出來，套用紅色標籤
+                let formatted = desc.replace(/(新學習)/g, '<span class="font-black text-red-700 bg-red-100 px-1 rounded">$1</span>');
+                // 其他複習與測驗維持紫色標籤
+                formatted = formatted.replace(/(複習[1-5]|複習|回顧|統整|刷題|演練|測驗|計時模擬考)/g, '<span class="font-black text-indigo-700 bg-indigo-100 px-1 rounded">$1</span>');
+                // 科目名稱加粗
                 formatted = formatted.replace(/(數學|理化|英文|國文|歷史|地理|公民|地科|社會)/g, '<span class="font-bold">$1</span>');
                 return formatted;
             }
