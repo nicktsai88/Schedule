@@ -60,14 +60,11 @@
             <!-- 使用者登入區塊 -->
             <div class="bg-white/10 p-2 px-4 rounded-xl backdrop-blur-sm border border-white/20 flex flex-col justify-center items-center gap-2">
                 <template v-if="!isLoggedIn">
-                    <!-- 第一排：輸入框與登入按鈕 -->
                     <div class="flex flex-col md:flex-row items-center gap-3 w-full justify-center">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-user-circle text-xl text-yellow-300"></i>
                             <input v-model="userNameInput" @keyup.enter="login" type="text" placeholder="輸入姓名登入" class="px-3 py-1.5 text-sm text-gray-800 rounded outline-none w-32 md:w-40 focus:ring-2 focus:ring-yellow-400 font-bold transition-all">
                         </div>
-                        
-                        <!-- 動態按鈕：輸入文字後會發光變亮 -->
                         <button @click="login" :disabled="isLoggingIn || !isFirebaseReady || !userNameInput.trim()" 
                                 class="px-4 py-1.5 rounded font-bold text-sm shadow transition-all duration-300 whitespace-nowrap"
                                 :class="(userNameInput.trim() && isFirebaseReady && !isLoggingIn) ? 'bg-yellow-400 hover:bg-yellow-300 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.6)] scale-105' : 'bg-white/20 text-white/50 border border-white/20 cursor-not-allowed'">
@@ -76,7 +73,6 @@
                         </button>
                     </div>
 
-                    <!-- 第二排：快速登入名單 -->
                     <div v-if="historicalUsers.length > 0" class="flex flex-wrap items-center justify-center gap-2 mt-1 pt-2 border-t border-white/10 w-full">
                         <span class="text-white/80 text-xs font-bold"><i class="fas fa-bolt text-yellow-400 mr-1"></i>快速登入:</span>
                         <button v-for="user in historicalUsers" :key="user" @click="quickLogin(user)" 
@@ -109,7 +105,6 @@
                 <i class="fas fa-calendar-week mr-2 text-indigo-500"></i> {{ week.title }}
             </h2>
             
-            <!-- 日期卡片 -->
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <div v-for="day in week.days" :key="day.date" 
                      @click="openModal(day)"
@@ -120,7 +115,6 @@
                          isPast(day.date) && !isToday(day.date) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
                      ]">
                     
-                    <!-- Card Header -->
                     <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center shrink-0">
                         <div class="font-bold text-gray-800 text-lg flex items-center">
                             {{ day.date }} <span class="text-sm text-gray-500 ml-1 mr-2">({{ day.dayOfWeek }})</span>
@@ -131,14 +125,12 @@
                         </div>
                     </div>
 
-                    <!-- Card Body (Events) -->
                     <div class="p-2 space-y-2 flex-grow overflow-y-auto max-h-[300px] hide-scrollbar">
                         <div v-for="(event, eIndex) in day.events" :key="event.id" 
                              @click.stop="toggleTask(event)"
                              class="text-sm flex flex-row p-2 rounded border transition-all duration-200 cursor-pointer hover:shadow-sm"
                              :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
                             
-                            <!-- Checkbox -->
                             <div class="pt-0.5 mr-2">
                                 <div class="w-5 h-5 rounded border flex items-center justify-center transition-colors duration-200"
                                      :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
@@ -164,7 +156,6 @@
         <div v-if="selectedDay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 
-                <!-- Modal Header -->
                 <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center" :class="getModalHeaderColor(selectedDay)">
                     <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                         <i class="fas fa-calendar-day mr-3 opacity-70"></i>
@@ -177,14 +168,12 @@
                     </button>
                 </div>
 
-                <!-- Modal Body -->
                 <div class="p-6 overflow-y-auto flex-grow bg-gray-50 space-y-4">
                     <div v-for="(event, eIndex) in selectedDay.events" :key="event.id" 
                          @click="toggleTask(event)"
                          class="flex p-4 rounded-xl border-2 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer select-none"
                          :class="[getEventStyle(event.desc), event.completed ? 'task-completed opacity-70 scale-[0.98]' : 'bg-white hover:border-indigo-300']">
                         
-                        <!-- Checkbox 放大版 -->
                         <div class="flex items-center justify-center mr-4">
                             <div class="w-6 h-6 rounded border-2 flex items-center justify-center transition-colors duration-200"
                                  :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
@@ -201,7 +190,6 @@
                     </div>
                 </div>
                 
-                <!-- Modal Footer -->
                 <div class="px-6 py-4 border-t border-gray-200 bg-white text-center">
                     <button @click="closeModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
                         確認並關閉
@@ -233,7 +221,7 @@
     const DOC_GLOBAL = 'UserList'; 
     let currentUserDocUnsubscribe = null;
 
-    // 究極升級版：所有國英數理社皆達成 5 次複習。
+    // 究極升級版：3/30優先執行數學3-1複習1，3/31執行數學3-1複習2，數學3-2新學習延至4/1。
     const rawScheduleText = [
         // Week 1
         { date: "3/25", day: "三", events: [
@@ -278,57 +266,57 @@
         ]},
         // Week 2
         { date: "3/30", day: "一", events: [
-            { time: "18:30-20:00", desc: "數學(3-2作圖) 新學習" },
-            { time: "20:00-21:00", desc: "理化(3-2酸鹼) 複習1" },
-            { time: "21:00-21:30", desc: "英文(L3單字/課文) 複習1" },
-            { time: "21:30-22:00", desc: "歷史(L4) 複習1" },
-            { time: "22:00-22:30", desc: "國文(陋室銘) 複習1" }
+            { time: "18:30-19:30", desc: "數學(3-1內外角) 複習1" },
+            { time: "19:30-20:30", desc: "理化(3-2酸鹼) 複習1" },
+            { time: "20:30-21:00", desc: "英文(L3單字/課文) 複習1" },
+            { time: "21:00-21:30", desc: "歷史(L4) 複習1" },
+            { time: "21:30-22:00", desc: "國文(陋室銘) 複習1" },
+            { time: "22:00-22:30", desc: "公民(L3) 複習2" }
         ]},
         { date: "3/31", day: "二", events: [
-            { time: "18:30-19:00", desc: "公民(L3) 複習2" },
+            { time: "18:30-19:00", desc: "地理(L3) 複習3" },
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-21:00", desc: "數學(3-2作圖) 複習1" },
-            { time: "21:00-22:00", desc: "數學(3-1內外角) 複習1" },
+            { time: "20:00-21:00", desc: "數學(3-1內外角) 複習2" },
+            { time: "21:00-22:00", desc: "理化(3-1/3-2) 刷題特訓" },
             { time: "22:00-22:30", desc: "歷史(L3) 複習3" }
         ]},
         { date: "4/01", day: "三", events: [
-            { time: "18:30-20:00", desc: "數學(3-3全等) 新學習" },
+            { time: "18:30-20:00", desc: "數學(3-2作圖) 新學習" },
             { time: "20:00-21:00", desc: "地理(L4) 新學習" },
             { time: "21:00-22:00", desc: "公民(L4) 新學習" },
-            { time: "22:00-22:30", desc: "地理(L3) 複習3" }
+            { time: "22:00-22:30", desc: "國文(康橋) 複習2" }
         ]},
         { date: "4/02", day: "四", events: [
             { time: "18:30-19:00", desc: "公民(L3) 複習3" },
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:30", desc: "理化(3-3酸鹼性) 新學習" },
-            { time: "21:30-22:30", desc: "理化(3-2酸鹼) 複習2" }
+            { time: "21:30-22:30", desc: "數學(3-2作圖) 複習1" }
         ]},
         { date: "4/03", day: "五", events: [
-            { time: "08:00-09:30", desc: "國文(森林) 新學習" },
-            { time: "09:30-11:00", desc: "英文(L3文法) 新學習" },
-            { time: "11:00-12:00", desc: "數學(3-3全等) 複習1" },
+            { time: "08:00-09:30", desc: "數學(3-3全等) 新學習" },
+            { time: "09:30-11:00", desc: "國文(森林) 新學習" },
+            { time: "11:00-12:00", desc: "數學(3-1內外角) 複習3" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-15:00", desc: "理化(3-4中和) 新學習" },
-            { time: "15:00-16:30", desc: "國文(題詞/柬帖) 新學習" },
+            { time: "13:30-15:00", desc: "英文(L3文法) 新學習" },
+            { time: "15:00-16:30", desc: "理化(3-4中和) 新學習" },
             { time: "16:30-17:30", desc: "理化(3-3酸鹼性) 複習1" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:00", desc: "理化(3-1電解質) 複習3" },
-            { time: "21:00-21:30", desc: "歷史(L4) 複習2" },
-            { time: "21:30-22:00", desc: "地理(L4) 複習1" },
-            { time: "22:00-22:30", desc: "公民(L4) 複習1" }
+            { time: "21:00-22:00", desc: "數學(3-2作圖) 複習2" },
+            { time: "22:00-22:30", desc: "地理(L4) 複習1" }
         ]},
         { date: "4/04", day: "六", events: [
             { time: "08:00-09:30", desc: "數學(3-4中垂線/角平分線) 新學習" },
             { time: "09:30-11:00", desc: "英文(L4單字/課文) 新學習" },
-            { time: "11:00-12:00", desc: "數學(3-2作圖) 複習2" },
+            { time: "11:00-12:00", desc: "數學(3-3全等) 複習1" },
             { time: "12:00-13:30", desc: "午餐與午休" },
             { time: "13:30-14:00", desc: "準備家教" },
             { time: "14:00-17:30", desc: "理化家教" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "國文家教" },
             { time: "21:00-22:00", desc: "理化(3-4中和) 複習1" },
-            { time: "22:00-22:30", desc: "國文(康橋) 複習2" }
+            { time: "22:00-22:30", desc: "公民(L4) 複習1" }
         ]},
         { date: "4/05", day: "日", events: [
             { time: "08:00-09:30", desc: "英文(L4文法) 新學習" },
@@ -339,11 +327,10 @@
             { time: "16:00-17:30", desc: "國文(文言文49-51) 新學習" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-20:00", desc: "數學(3-4中垂線) 複習1" },
-            { time: "20:00-20:30", desc: "英文(L3單字/課文) 複習2" },
-            { time: "20:30-21:00", desc: "國文(陋室銘) 複習2" },
-            { time: "21:00-21:30", desc: "國文(森林) 複習1" },
-            { time: "21:30-22:00", desc: "英文(L3文法) 複習1" },
-            { time: "22:00-22:30", desc: "國文(題詞/柬帖) 複習1" }
+            { time: "20:00-21:00", desc: "數學(3-3全等) 複習2" },
+            { time: "21:00-21:30", desc: "英文(L3單字/課文) 複習2" },
+            { time: "21:30-22:00", desc: "國文(森林) 複習1" },
+            { time: "22:00-22:30", desc: "英文(L3文法) 複習1" }
         ]},
         // Week 3
         { date: "4/06", day: "一", events: [
@@ -351,27 +338,26 @@
             { time: "09:30-11:00", desc: "理化(4-2平衡) 新學習" },
             { time: "11:00-12:00", desc: "理化(4-1速率) 複習1" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-15:00", desc: "國文(文言文52-54) 新學習" },
-            { time: "15:00-16:00", desc: "數學(3-3全等) 複習2" },
-            { time: "16:00-17:00", desc: "理化(3-2酸鹼) 複習3" },
-            { time: "17:00-17:30", desc: "英文(L4單字/課文) 複習1" },
+            { time: "13:30-15:00", desc: "國文(題詞/柬帖) 新學習" },
+            { time: "15:00-16:30", desc: "國文(文言文52-54) 新學習" },
+            { time: "16:30-17:30", desc: "數學(3-4中垂線) 複習2" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
-            { time: "19:00-20:00", desc: "理化(3-3酸鹼性) 複習2" },
-            { time: "20:00-20:30", desc: "英文(L4文法) 複習1" },
-            { time: "20:30-21:00", desc: "國文(文言文49-51) 複習1" },
-            { time: "21:00-21:30", desc: "地理(L4) 複習2" },
-            { time: "21:30-22:00", desc: "公民(L4) 複習2" },
-            { time: "22:00-22:30", desc: "國文(文言文52-54) 複習1" }
+            { time: "19:00-20:00", desc: "理化(3-2酸鹼) 複習2" },
+            { time: "20:00-20:30", desc: "英文(L4單字/課文) 複習1" },
+            { time: "20:30-21:00", desc: "英文(L4文法) 複習1" },
+            { time: "21:00-21:30", desc: "國文(文言文49-51) 複習1" },
+            { time: "21:30-22:00", desc: "地理(L4) 複習2" },
+            { time: "22:00-22:30", desc: "公民(L4) 複習2" }
         ]},
         { date: "4/07", day: "二", events: [
-            { time: "18:30-19:00", desc: "國文(康橋) 複習3" },
+            { time: "18:30-19:00", desc: "國文(文言文52-54) 複習1" },
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-21:00", desc: "理化(4-2平衡) 複習1" },
-            { time: "21:00-22:00", desc: "數學(3-4中垂線) 複習2" },
-            { time: "22:00-22:30", desc: "國文(陋室銘) 複習3" }
+            { time: "21:00-22:00", desc: "數學(3-5邊角關係) 複習1" },
+            { time: "22:00-22:30", desc: "國文(題詞/柬帖) 複習1" }
         ]},
         { date: "4/08", day: "三", events: [
-            { time: "18:30-19:30", desc: "數學(3-1內外角) 複習2" },
+            { time: "18:30-19:30", desc: "數學(3-2作圖) 複習3" },
             { time: "19:30-20:30", desc: "理化(3-4中和) 複習2" },
             { time: "20:30-21:00", desc: "歷史(L4) 複習3" },
             { time: "21:00-21:30", desc: "英文(L3單字/課文) 複習3" },
@@ -389,15 +375,15 @@
         { date: "4/10", day: "五", events: [
             { time: "18:30-19:00", desc: "英文(L4文法) 複習2" },
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-21:00", desc: "數學(3-5邊角關係) 複習1" },
-            { time: "21:00-22:00", desc: "數學(3-2作圖) 複習3" },
+            { time: "20:00-21:00", desc: "數學(3-1內外角) 複習4" },
+            { time: "21:00-22:00", desc: "數學(3-3全等) 複習3" },
             { time: "22:00-22:30", desc: "國文(文言文49-51) 複習2" }
         ]},
         { date: "4/11", day: "六", events: [
             { time: "08:00-09:00", desc: "理化(4-2平衡) 複習2" },
             { time: "09:00-10:00", desc: "數學(3-5邊角關係) 複習2" },
             { time: "10:00-11:00", desc: "理化(3-3酸鹼性) 複習3" },
-            { time: "11:00-12:00", desc: "數學(3-3全等) 複習3" },
+            { time: "11:00-12:00", desc: "數學(3-4中垂線) 複習3" },
             { time: "12:00-13:30", desc: "午餐與午休" },
             { time: "13:30-14:00", desc: "休息準備" },
             { time: "14:00-17:30", desc: "理化家教" },
@@ -408,7 +394,7 @@
             { time: "22:00-22:30", desc: "國文(森林) 複習3" }
         ]},
         { date: "4/12", day: "日", events: [
-            { time: "08:00-09:00", desc: "數學(3-4中垂線) 複習3" },
+            { time: "08:00-09:00", desc: "數學(3-2作圖) 複習4" },
             { time: "09:00-10:00", desc: "理化(3-4中和) 複習3" },
             { time: "10:00-11:00", desc: "數學(3-5邊角關係) 複習3" },
             { time: "11:00-12:00", desc: "理化(4-1速率) 複習3" },
@@ -421,14 +407,15 @@
             { time: "17:00-17:30", desc: "國文(文言文49-51) 複習3" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-19:30", desc: "國文(文言文52-54) 複習3" },
-            { time: "19:30-22:30", desc: "各科歷屆考題與模擬演練" }
+            { time: "19:30-20:30", desc: "理化(3-1電解質) 複習4" },
+            { time: "20:30-22:30", desc: "各科歷屆考題與模擬演練" }
         ]},
         // Week 4
         { date: "4/13", day: "一", events: [
-            { time: "18:30-19:30", desc: "數學(3-1內外角) 複習3" },
-            { time: "19:30-20:30", desc: "數學(3-2作圖) 複習4" },
-            { time: "20:30-21:30", desc: "理化(3-1電解質) 複習4" },
-            { time: "21:30-22:30", desc: "理化(3-2酸鹼) 複習4" }
+            { time: "18:30-19:30", desc: "數學(3-3全等) 複習4" },
+            { time: "19:30-20:30", desc: "數學(3-4中垂線) 複習4" },
+            { time: "20:30-21:30", desc: "理化(3-2酸鹼) 複習4" },
+            { time: "21:30-22:30", desc: "理化(3-3酸鹼性) 複習4" }
         ]},
         { date: "4/14", day: "二", events: [
             { time: "18:30-19:00", desc: "數學家教預習" },
@@ -436,12 +423,12 @@
             { time: "20:00-20:30", desc: "歷史(L3) 複習4" },
             { time: "20:30-21:00", desc: "歷史(L4) 複習4" },
             { time: "21:00-21:30", desc: "英文(L3單字/課文) 複習4" },
-            { time: "21:30-22:30", desc: "數學(3-3全等) 複習4" }
+            { time: "21:30-22:30", desc: "數學(3-5邊角關係) 複習4" }
         ]},
         { date: "4/15", day: "三", events: [
-            { time: "18:30-19:30", desc: "數學(3-4中垂線) 複習4" },
-            { time: "19:30-20:30", desc: "理化(3-3酸鹼性) 複習4" },
-            { time: "20:30-21:30", desc: "理化(3-4中和) 複習4" },
+            { time: "18:30-19:30", desc: "理化(3-4中和) 複習4" },
+            { time: "19:30-20:30", desc: "理化(4-1速率) 複習4" },
+            { time: "20:30-21:30", desc: "數學(3-1內外角) 複習5" },
             { time: "21:30-22:00", desc: "地理(L3) 複習4" },
             { time: "22:00-22:30", desc: "地理(L4) 複習4" }
         ]},
@@ -449,73 +436,71 @@
             { time: "18:30-19:00", desc: "數學家教預習" },
             { time: "19:00-20:00", desc: "數學家教" },
             { time: "20:00-20:30", desc: "國文(康橋) 複習4" },
-            { time: "20:30-21:00", desc: "國文(陋室銘) 複習4" },
+            { time: "20:30-21:00", desc: "國文(陋室銘) 複習3" },
             { time: "21:00-21:30", desc: "英文(L3文法) 複習4" },
-            { time: "21:30-22:30", desc: "理化(4-1速率) 複習4" }
+            { time: "21:30-22:30", desc: "理化(4-2平衡) 複習4" }
         ]},
         { date: "4/17", day: "五", events: [
-            { time: "18:30-19:00", desc: "整理本週筆記" },
+            { time: "18:30-19:00", desc: "公民(L4) 複習4" },
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-21:00", desc: "數學(3-5邊角關係) 複習4" },
-            { time: "21:00-22:00", desc: "理化(4-2平衡) 複習4" },
-            { time: "22:00-22:30", desc: "公民(L3) 複習4" }
+            { time: "20:00-21:00", desc: "數學(3-2作圖) 複習5" },
+            { time: "21:00-22:00", desc: "理化(3-1電解質) 複習5" },
+            { time: "22:00-22:30", desc: "全科弱點觀念 二次掃描" }
         ]},
         { date: "4/18", day: "六", events: [
-            { time: "08:00-09:00", desc: "數學(3-1內外角) 複習4" },
-            { time: "09:00-10:00", desc: "數學(3-2作圖) 複習5" },
-            { time: "10:00-11:00", desc: "理化(3-1電解質) 複習5" },
-            { time: "11:00-12:00", desc: "理化(3-2酸鹼) 複習5" },
+            { time: "08:00-09:00", desc: "理化(3-2酸鹼) 複習5" },
+            { time: "09:00-10:00", desc: "數學(3-3全等) 複習5" },
+            { time: "10:00-11:00", desc: "理化(3-3酸鹼性) 複習5" },
+            { time: "11:00-12:00", desc: "理化(3-4中和) 複習5" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-14:00", desc: "公民(L4) 複習4" },
+            { time: "13:30-14:00", desc: "國文(森林) 複習4" },
             { time: "14:00-17:30", desc: "理化家教" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
             { time: "19:00-21:00", desc: "國文家教" },
-            { time: "21:00-21:30", desc: "國文(森林) 複習4" },
-            { time: "21:30-22:30", desc: "數學(3-3全等) 複習5" }
+            { time: "21:00-21:30", desc: "國文(題詞/柬帖) 複習4" },
+            { time: "21:30-22:30", desc: "數學(3-4中垂線) 複習5" }
         ]},
         { date: "4/19", day: "日", events: [
-            { time: "08:00-08:30", desc: "國文(題詞/柬帖) 複習4" },
-            { time: "08:30-09:00", desc: "國文(文言文49-51) 複習4" },
-            { time: "09:00-09:30", desc: "國文(文言文52-54) 複習4" },
+            { time: "08:00-08:30", desc: "國文(文言文49-51) 複習4" },
+            { time: "08:30-09:00", desc: "國文(文言文52-54) 複習4" },
+            { time: "09:00-09:30", desc: "英文(L4單字/課文) 複習4" },
             { time: "09:30-12:00", desc: "英文家教" },
             { time: "12:00-13:30", desc: "午餐與午休" },
-            { time: "13:30-14:00", desc: "英文(L4單字/課文) 複習4" },
-            { time: "14:00-14:30", desc: "英文(L4文法) 複習4" },
-            { time: "14:30-15:00", desc: "歷史(L3) 複習5" },
+            { time: "13:30-14:00", desc: "英文(L4文法) 複習4" },
+            { time: "14:00-14:30", desc: "歷史(L3) 複習5" },
+            { time: "14:30-15:00", desc: "歷史(L4) 複習5" },
             { time: "15:00-16:00", desc: "地科家教" },
-            { time: "16:00-16:30", desc: "歷史(L4) 複習5" },
-            { time: "16:30-17:00", desc: "地理(L3) 複習5" },
-            { time: "17:00-17:30", desc: "地理(L4) 複習5" },
+            { time: "16:00-16:30", desc: "地理(L3) 複習5" },
+            { time: "16:30-17:00", desc: "地理(L4) 複習5" },
+            { time: "17:00-17:30", desc: "公民(L3) 複習5" },
             { time: "17:30-19:00", desc: "運動與晚餐" },
-            { time: "19:00-20:00", desc: "理化(3-3酸鹼性) 複習5" },
-            { time: "20:00-21:00", desc: "理化(3-4中和) 複習5" },
-            { time: "21:00-22:00", desc: "數學(3-1內外角) 複習5" }
+            { time: "19:00-20:00", desc: "理化(4-1速率) 複習5" },
+            { time: "20:00-21:00", desc: "理化(4-2平衡) 複習5" },
+            { time: "21:00-22:00", desc: "數學(3-5邊角關係) 複習5" },
+            { time: "22:00-22:30", desc: "公民(L4) 複習5" }
         ]},
         // Week 5
         { date: "4/20", day: "一", events: [
-            { time: "18:30-19:30", desc: "數學(3-4中垂線) 複習5" },
-            { time: "19:30-20:30", desc: "數學(3-5邊角關係) 複習5" },
-            { time: "20:30-21:30", desc: "理化(4-1速率) 複習5" },
-            { time: "21:30-22:30", desc: "理化(4-2平衡) 複習5" }
+            { time: "18:30-19:30", desc: "數學(全範圍) 弱點突破特訓" },
+            { time: "19:30-20:30", desc: "理化(全範圍) 弱點突破特訓" },
+            { time: "20:30-21:30", desc: "國文(陋室銘) 複習4" },
+            { time: "21:30-22:00", desc: "英文(L3單字/課文) 複習5" },
+            { time: "22:00-22:30", desc: "英文(L3文法) 複習5" }
         ]},
         { date: "4/21", day: "二", events: [
             { time: "18:30-19:00", desc: "準備家教" },
             { time: "19:00-20:00", desc: "數學家教" },
-            { time: "20:00-20:30", desc: "公民(L3) 複習5" },
-            { time: "20:30-21:00", desc: "公民(L4) 複習5" },
-            { time: "21:00-21:30", desc: "英文(L3單字/課文) 複習5" },
-            { time: "21:30-22:00", desc: "英文(L3文法) 複習5" },
-            { time: "22:00-22:30", desc: "英文(L4單字/課文) 複習5" }
+            { time: "20:00-20:30", desc: "英文(L4單字/課文) 複習5" },
+            { time: "20:30-21:00", desc: "英文(L4文法) 複習5" },
+            { time: "21:00-21:30", desc: "國文(康橋) 複習5" },
+            { time: "21:30-22:00", desc: "國文(陋室銘) 複習5" },
+            { time: "22:00-22:30", desc: "國文(森林) 複習5" }
         ]},
         { date: "4/22", day: "三", events: [
-            { time: "18:30-19:00", desc: "英文(L4文法) 複習5" },
-            { time: "19:00-19:30", desc: "國文(康橋) 複習5" },
-            { time: "19:30-20:00", desc: "國文(陋室銘) 複習5" },
-            { time: "20:00-20:30", desc: "國文(森林) 複習5" },
-            { time: "20:30-21:00", desc: "國文(題詞/柬帖) 複習5" },
-            { time: "21:00-21:30", desc: "國文(文言文49-51) 複習5" },
-            { time: "21:30-22:00", desc: "國文(文言文52-54) 複習5" },
-            { time: "22:00-22:30", desc: "全科 綜合錯題檢討" }
+            { time: "18:30-19:00", desc: "國文(題詞/柬帖) 複習5" },
+            { time: "19:00-19:30", desc: "國文(文言文49-51) 複習5" },
+            { time: "19:30-20:00", desc: "國文(文言文52-54) 複習5" },
+            { time: "20:00-22:30", desc: "全科 綜合錯題檢討與模擬測驗" }
         ]},
         { date: "4/23", day: "四", events: [
             { time: "18:30-19:00", desc: "準備家教" },
@@ -797,7 +782,7 @@
                 return 'bg-indigo-50';
             },
             getEventStyle(desc) {
-                if (desc.includes('突發')) return 'bg-gray-200 border-gray-400 text-gray-600 border-dashed opacity-75';
+                if (desc.includes('突發') || desc.includes('延後')) return 'bg-gray-200 border-gray-400 text-gray-600 border-dashed opacity-75';
                 if (desc.includes('數學') && !desc.includes('家教')) return 'bg-blue-50 border-blue-200 text-blue-800';
                 if (desc.includes('理化') && !desc.includes('家教')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文') && !desc.includes('家教')) return 'bg-red-50 border-red-200 text-red-800';
@@ -808,7 +793,7 @@
                 
                 if (desc.includes('複習') || desc.includes('回顧') || desc.includes('統整') || desc.includes('新學習') || desc.includes('刷題') || desc.includes('測驗') || desc.includes('演練')) return 'bg-teal-50 border-teal-200 text-teal-900';
                 
-                if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動') || desc.includes('平靜心情')) return 'bg-gray-100 border-gray-200 text-gray-500 border-dashed';
+                if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動') || desc.includes('平靜心情') || desc.includes('準備')) return 'bg-gray-100 border-gray-200 text-gray-500 border-dashed';
 
                 return 'bg-white border-gray-200 text-gray-700'; 
             },
