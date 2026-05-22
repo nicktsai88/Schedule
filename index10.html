@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 道明中學國二下 第二次段考 前三名衝刺計畫</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 今日專屬發光外框動畫 */
+        .glow-today {
+            box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6);
+            border-color: #facc15 !important;
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        /* 打勾後的視覺變化 */
+        .task-completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background-color: #f9fafb !important;
+            border-color: #e5e7eb !important;
+            color: #9ca3af !important;
+        }
+        /* 自定義彈出視窗動畫 */
+        .modal-enter-active, .modal-leave-active {
+            transition: all 0.3s ease;
+        }
+        .modal-enter-from, .modal-leave-to {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+<div id="app" class="min-h-screen pb-12" v-cloak>
+    <!-- Header (含登入功能) -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="w-full px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-black tracking-wider flex items-center">
+                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>道明國二下 前三名衝刺計畫
+                </h1>
+                <p class="text-blue-100 text-sm mt-1">執行期間：3/25 ～ 5/4 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
+            </div>
+            
+            <!-- 使用者登入區塊 -->
+            <div class="bg-white/10 p-2 px-4 rounded-xl backdrop-blur-sm border border-white/20 flex flex-col justify-center items-center gap-2">
+                <div v-if="!isLoggedIn" class="w-full flex flex-col items-center gap-2">
+                    <div class="flex flex-col md:flex-row items-center gap-3 w-full justify-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-user-circle text-xl text-yellow-300"></i>
+                            <input v-model="userNameInput" @keyup.enter="login" type="text" placeholder="輸入姓名登入" class="px-3 py-1.5 text-sm text-gray-800 rounded outline-none w-32 md:w-40 focus:ring-2 focus:ring-yellow-400 font-bold transition-all">
+                        </div>
+                        <button @click="login" :disabled="isLoggingIn || !isFirebaseReady || !userNameInput.trim()" 
+                                class="px-4 py-1.5 rounded font-bold text-sm shadow transition-all duration-300 whitespace-nowrap"
+                                :class="(userNameInput.trim() && isFirebaseReady && !isLoggingIn) ? 'bg-yellow-400 hover:bg-yellow-300 text-yellow-900 shadow-[0_0_15px_rgba(250,204,21,0.6)] scale-105' : 'bg-white/20 text-white/50 border border-white/20 cursor-not-allowed'">
+                            <span v-if="isLoggingIn"><i class="fas fa-spinner fa-spin mr-1"></i>連線中</span>
+                            <span v-else><i class="fas fa-sign-in-alt mr-1"></i>登入存檔</span>
+                        </button>
+                    </div>
+
+                    <div v-if="historicalUsers.length > 0" class="flex flex-wrap items-center justify-center gap-2 mt-1 pt-2 border-t border-white/10 w-full">
+                        <span class="text-white/80 text-xs font-bold"><i class="fas fa-bolt text-yellow-400 mr-1"></i>快速登入:</span>
+                        <button v-for="user in historicalUsers" :key="user" @click="quickLogin(user)" 
+                                class="text-xs bg-white/20 hover:bg-white/40 text-white px-3 py-1 rounded-full transition-colors border border-white/30 shadow-sm">
+                            {{ user }}
+                        </button>
+                    </div>
+                </div>
+                <div v-else class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full shadow-inner font-bold text-sm">
+                        <i class="fas fa-check-circle text-green-700"></i>
+                        <span>{{ currentUser }}</span>
+                    </div>
+                    <button @click="logout" class="bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-1.5 rounded font-bold text-xs shadow transition-colors whitespace-nowrap border border-indigo-400">
+                        登出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="w-full px-3 md:px-5 lg:px-8 py-6">
+        
+        <!-- Weeks Grid -->
+        <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
+            <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center border-b-2 border-indigo-200 pb-2">
+                <i class="fas fa-calendar-week mr-2 text-indigo-500"></i> {{ week.title }}
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div v-for="day in week.days" :key="day.date" 
+                     @click="openModal(day)"
+                     class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative"
+                     :class="[
+                         getDayBorderColor(day.dayOfWeek, day.date), 
+                         isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '',
+                         isPast(day.date) && !isToday(day.date) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
+                     ]">
+                    
+                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center shrink-0">
+                        <div class="font-bold text-gray-800 text-lg flex items-center">
+                            {{ day.date }} <span class="text-sm text-gray-500 ml-1 mr-2">({{ day.dayOfWeek }})</span>
+                            <span v-if="isToday(day.date)" class="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full animate-pulse">今日</span>
+                        </div>
+                        <div v-if="day.isHoliday" class="text-xs font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full shadow-sm">
+                            假日黃金期
+                        </div>
+                    </div>
+
+                    <div class="p-2 space-y-2 flex-grow overflow-y-auto max-h-[300px] hide-scrollbar">
+                        <div v-for="(event, eIndex) in day.events" :key="event.id" 
+                             @click.stop="toggleTask(event)"
+                             class="text-sm flex flex-row p-2 rounded border transition-all duration-200 cursor-pointer hover:shadow-sm"
+                             :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
+                            
+                            <div class="pt-0.5 mr-2">
+                                <div class="w-5 h-5 rounded border flex items-center justify-center transition-colors duration-200"
+                                     :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
+                                     <i v-if="event.completed" class="fas fa-check text-white text-xs"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow flex flex-col select-none">
+                                <div class="font-mono text-xs font-semibold opacity-70 mb-1 flex items-center">
+                                    <i class="far fa-clock mr-1"></i> {{ event.time }}
+                                </div>
+                                <div class="font-medium leading-relaxed tracking-wide" v-html="formatDesc(event.desc)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 彈出式閱讀視窗 (Modal) -->
+    <transition name="modal">
+        <div v-if="selectedDay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+                
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center" :class="getModalHeaderColor(selectedDay)">
+                    <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-calendar-day mr-3 opacity-70"></i>
+                        {{ selectedDay.date }} ({{ selectedDay.dayOfWeek }}) 詳細進度
+                        <span v-if="selectedDay.isHoliday" class="ml-3 text-sm font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full">假日黃金期</span>
+                        <span v-if="isToday(selectedDay.date)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">✨ 就是今天</span>
+                    </h3>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto flex-grow bg-gray-50 space-y-4">
+                    <div v-for="(event, eIndex) in selectedDay.events" :key="event.id" 
+                         @click="toggleTask(event)"
+                         class="flex p-4 rounded-xl border-2 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer select-none"
+                         :class="[getEventStyle(event.desc), event.completed ? 'task-completed opacity-70 scale-[0.98]' : 'bg-white hover:border-indigo-300']">
+                        
+                        <div class="flex items-center justify-center mr-4">
+                            <div class="w-6 h-6 rounded border-2 flex items-center justify-center transition-colors duration-200"
+                                 :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
+                                 <i v-if="event.completed" class="fas fa-check text-white text-sm"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col justify-center">
+                            <div class="font-mono text-sm font-bold opacity-75 text-gray-600 mb-1 flex items-center">
+                                <i class="far fa-clock text-indigo-400 mr-2"></i> {{ event.time }}
+                            </div>
+                            <div class="text-lg font-bold leading-relaxed" v-html="formatDesc(event.desc)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-4 border-t border-gray-200 bg-white text-center">
+                    <button @click="closeModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                        確認並關閉
+                    </button>
+                </div>
+            </div>
+        </div>
+    </transition>
+</div>
+
+<script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+    import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxQFt76ZPXE7d0i1XeNZ1yiiD2WYNIfHs",
+        authDomain: "chinese-learning-47f4d.firebaseapp.com",
+        projectId: "chinese-learning-47f4d",
+        storageBucket: "chinese-learning-47f4d.firebasestorage.app",
+        messagingSenderId: "76289812052",
+        appId: "1:76289812052:web:898384a916f9f341f62fc1"
+    };
+
+    let db, auth;
+    let isFirebaseReady = false;
+    const COLLECTION_NAME = 'Schedule'; 
+    const DOC_GLOBAL = 'UserList'; 
+    let currentUserDocUnsubscribe = null;
+
+    const rawScheduleText = [
+        // Week 1 
+        { date: "3/25", day: "三", events: [
+            { time: "18:00-19:30", desc: "段考完晚餐與放鬆休息" },
+            { time: "19:30-21:00", desc: "理化(3-1 認識電解質) 新學習" },
+            { time: "21:00-22:00", desc: "歷史(L3 現代國家的挑戰) 新學習" },
+            { time: "22:00-22:30", desc: "整理今日筆記" }
+        ]},
+        { date: "3/26", day: "四", events: [
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "地理(L3 西亞與北非的自然環境與文化) 新學習" },
+            { time: "21:00-22:00", desc: "公民(L3 犯罪與刑罰) 新學習" },
+            { time: "22:00-22:30", desc: "歷史(L3 現代國家的挑戰) 複習1" }
+        ]},
+        { date: "3/27", day: "五", events: [
+            { time: "18:30-19:00", desc: "整理筆記" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:30", desc: "國文(L4 我所知道的康橋) 新學習" },
+            { time: "21:30-22:30", desc: "理化(3-1 認識電解質) 複習1" }
+        ]},
+        { date: "3/28", day: "六", events: [
+            { time: "08:00-18:00", desc: "戶外教學" },
+            { time: "18:00-19:00", desc: "晚餐與休息" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:30-22:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習1" },
+            { time: "22:00-22:30", desc: "公民(L3 犯罪與刑罰) 複習1" }
+        ]},
+        { date: "3/29", day: "日", events: [
+            { time: "08:00-09:30", desc: "英文(L3單/課 Our Food Smells Good) 新學習" },
+            { time: "09:30-11:00", desc: "數學(3-1 三角形與多邊形的內角與外角) 新學習" },
+            { time: "11:00-12:00", desc: "國文(L4 我所知道的康橋) 複習1" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:30", desc: "歷史(L4 中日戰爭與國共內戰) 新學習" },
+            { time: "14:30-16:00", desc: "理化(3-2 常見的酸鹼性物質) 新學習" },
+            { time: "16:00-17:00", desc: "⚠️ 臨時突發事務 (數學延後)" },
+            { time: "17:00-17:30", desc: "歷史(L3 現代國家的挑戰) 複習2" },
+            { time: "17:30-19:00", desc: "運動與晚餐" },
+            { time: "19:00-20:30", desc: "國文(L5 陋室銘) 新學習" },
+            { time: "20:30-21:30", desc: "理化(3-1 認識電解質) 複習2" },
+            { time: "21:30-22:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習2" },
+            { time: "22:00-22:30", desc: "學校功課與週記" }
+        ]},
+        // Week 2 
+        { date: "3/30", day: "一", events: [
+            { time: "18:30-19:30", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習1" },
+            { time: "19:30-20:30", desc: "理化(3-2 常見的酸鹼性物質) 複習1" },
+            { time: "20:30-21:00", desc: "英文(L3單/課 Our Food Smells Good) 複習1" },
+            { time: "21:00-21:30", desc: "歷史(L4 中日戰爭與國共內戰) 複習1" },
+            { time: "21:30-22:00", desc: "國文(L5 陋室銘) 複習1" },
+            { time: "22:00-22:30", desc: "公民(L3 犯罪與刑罰) 複習2" }
+        ]},
+        { date: "3/31", day: "二", events: [
+            { time: "18:30-19:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習3" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習2" },
+            { time: "21:00-22:00", desc: "理化(3-1/3-2) 刷題特訓" },
+            { time: "22:00-22:30", desc: "歷史(L3 現代國家的挑戰) 複習3" }
+        ]},
+        { date: "4/01", day: "三", events: [
+            { time: "18:30-19:30", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習3" },
+            { time: "19:30-21:00", desc: "數學(3-2 尺規作圖) 新學習" },
+            { time: "21:00-22:00", desc: "地理(L4 西亞與北非的動盪與展望) 新學習" },
+            { time: "22:00-22:30", desc: "歷史(L3 現代國家的挑戰) 複習4" }
+        ]},
+        { date: "4/02", day: "四", events: [
+            { time: "18:00-20:00", desc: "段考後彈性休息 (原進度順延)" },
+            { time: "20:00-21:00", desc: "公民(L4 民事與刑事紛爭的解決) 新學習" },
+            { time: "21:00-22:30", desc: "段考後彈性休息 (原進度順延)" }
+        ]},
+        { date: "4/03", day: "五", events: [
+            { time: "08:00-09:00", desc: "理化(3-2 常見的酸鹼性物質) 複習1" },
+            { time: "09:00-10:00", desc: "數學(3-2 尺規作圖) 複習1" },
+            { time: "10:00-11:30", desc: "彈性休息 (原進度延後)" },
+            { time: "11:30-12:00", desc: "彈性休息與整理筆記" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-15:00", desc: "英文(L3文法 Our Food Smells Good) 新學習" },
+            { time: "15:00-16:00", desc: "國文(L4 我所知道的康橋) 複習2" },
+            { time: "16:00-17:00", desc: "國文(L5 陋室銘) 複習2" },
+            { time: "17:00-18:30", desc: "彈性休息 (原進度延後)" },
+            { time: "18:30-19:30", desc: "運動與晚餐" },
+            { time: "19:30-20:30", desc: "數學家教" },
+            { time: "20:30-21:30", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習4" },
+            { time: "21:30-22:00", desc: "公民(L3 犯罪與刑罰) 複習3" },
+            { time: "22:00-23:00", desc: "📖 國文/英文素養閱讀 或 彈性時間" }
+        ]},
+        { date: "4/04", day: "六", events: [
+            { time: "08:00-09:00", desc: "理化(3-2 常見的酸鹼性物質) 複習2" },
+            { time: "09:00-10:30", desc: "數學(3-2 尺規作圖) 複習2(追加)" },
+            { time: "10:30-12:00", desc: "國文(文言49-51 葉公/戴高帽/朝天子) 新學習" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:00", desc: "公民(L4 民事與刑事紛爭的解決) 複習1" },
+            { time: "14:00-17:30", desc: "理化(3-3 水溶液的酸鹼性) 新學習" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:00", desc: "地理(L4 西亞與北非的動盪與展望) 複習1" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:00-22:00", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習5(追加)" },
+            { time: "22:00-23:00", desc: "📖 國文/英文素養閱讀 或 彈性時間" }
+        ]},
+        { date: "4/05", day: "日", events: [
+            { time: "08:00-09:30", desc: "英文(L4單/課 Let's Set Up Camp Quickly) 新學習" },
+            { time: "09:30-12:00", desc: "英文家教" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-15:00", desc: "理化(3-4 酸鹼中和) 新學習" },
+            { time: "15:00-16:00", desc: "地科家教" },
+            { time: "16:00-17:30", desc: "國文(文言52-54 致浣弟/里仁/訓儉) 新學習" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:30", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習6(追加)" },
+            { time: "19:30-21:00", desc: "英文(L4文法 Let's Set Up Camp Quickly) 新學習" },
+            { time: "21:00-22:00", desc: "數學(3-2 尺規作圖) 複習3(追加)" },
+            { time: "22:00-23:00", desc: "📖 國文/英文素養閱讀 或 彈性時間" }
+        ]},
+        // Week 3
+        { date: "4/06", day: "一", events: [
+            { time: "08:00-09:30", desc: "數學(3-3 三角形的全等性質) 新學習" },
+            { time: "09:30-11:00", desc: "國文(L6 森林最優美的一天) 新學習" },
+            { time: "11:00-12:00", desc: "理化(3-1 認識電解質) 複習3" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:30", desc: "國文(文言49-51 葉公/戴高帽/朝天子) 複習1" },
+            { time: "14:30-15:30", desc: "國文(L5 陋室銘) 複習2" },
+            { time: "15:30-16:00", desc: "地理(L4 西亞與北非的動盪與展望) 複習2" },
+            { time: "16:00-17:30", desc: "國文(語二 應用文-題詞/柬帖) 新學習" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:30", desc: "英文(L4單/課 Let's Set Up Camp Quickly) 複習1" },
+            { time: "19:30-20:30", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習7(總結)" },
+            { time: "20:30-21:30", desc: "數學(3-2 尺規作圖) 複習4(追加)" },
+            { time: "21:30-22:00", desc: "公民(L4 民事與刑事紛爭的解決) 複習2" },
+            { time: "22:00-22:30", desc: "地理(L3 西亞與北非的自然環境與文化) 複習4" },
+            { time: "22:30-23:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習5" }
+        ]},
+        { date: "4/07", day: "二", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "英文(L4 Let's Set Up Camp Quickly) 新學習" },
+            { time: "21:00-22:00", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/08", day: "三", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "理化(3-3 水溶液的酸鹼性) 複習1" },
+            { time: "20:00-21:00", desc: "數學(3-2 尺規作圖) 複習3" },
+            { time: "21:00-21:30", desc: "歷史(L3 現代國家的挑戰) 複習3" },
+            { time: "21:30-22:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/09", day: "四", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "英文(L3 Our Food Smells Good) 複習3" },
+            { time: "21:00-21:30", desc: "公民(L3 犯罪與刑罰) 複習3" },
+            { time: "21:30-22:00", desc: "歷史(L4 中日戰爭與國共內戰) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/10", day: "五", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-3 三角形的全等性質) 新學習" },
+            { time: "20:00-21:00", desc: "理化(3-4 酸鹼中和) 新學習" },
+            { time: "21:00-21:30", desc: "地理(L4 西亞與北非的動盪與展望) 複習3" },
+            { time: "21:30-22:00", desc: "公民(L4 民事與刑事紛爭的解決) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/11", day: "六", events: [
+            { time: "08:00-09:00", desc: "國文(語文常識二 應用文-題詞/柬帖) 新學習" },
+            { time: "09:00-10:00", desc: "英文(L4 Let's Set Up Camp Quickly) 複習1" },
+            { time: "10:00-11:00", desc: "理化(3-3 水溶液的酸鹼性) 複習2" },
+            { time: "11:00-12:00", desc: "理化(3-1 認識電解質) 複習4" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:00", desc: "歷史(L3 現代國家的挑戰) 複習4" },
+            { time: "14:00-17:30", desc: "理化家教" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:00", desc: "地理(L3 西亞與北非的自然環境與文化) 複習4" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:00-22:00", desc: "國文(L4 我所知道的康橋) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/12", day: "日", events: [
+            { time: "08:00-09:00", desc: "數學(3-3 三角形的全等性質) 複習1" },
+            { time: "09:00-09:30", desc: "公民(L3 犯罪與刑罰) 複習4" },
+            { time: "09:30-12:00", desc: "英文家教" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:30", desc: "國文(L5 陋室銘) 複習3" },
+            { time: "14:30-15:00", desc: "歷史(L4 中日戰爭與國共內戰) 複習4" },
+            { time: "15:00-16:00", desc: "地科家教" },
+            { time: "16:00-17:00", desc: "理化(3-2 常見的酸鹼性物質) 複習4" },
+            { time: "17:00-17:30", desc: "地理(L4 西亞與北非的動盪與展望) 複習4" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:30", desc: "理化(3-4 酸鹼中和) 複習1" },
+            { time: "19:30-20:30", desc: "國文(L6 森林最優美的一天) 複習2" },
+            { time: "20:30-21:30", desc: "英文(L3 Our Food Smells Good) 複習4" },
+            { time: "21:30-22:00", desc: "公民(L4 民事與刑事紛爭的解決) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        // Week 4
+        { date: "4/13", day: "一", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-4 中垂線與角平分線的性質) 新學習" },
+            { time: "20:00-21:00", desc: "理化(4-1 反應速率) 新學習" },
+            { time: "21:00-22:00", desc: "國文(語文常識二 應用文-題詞/柬帖) 複習1" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/14", day: "二", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "數學(3-2 尺規作圖) 複習4" },
+            { time: "21:00-22:00", desc: "英文(L4 Let's Set Up Camp Quickly) 複習2" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/15", day: "三", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "理化(3-2 常見的酸鹼性物質) 複習5" },
+            { time: "20:00-21:00", desc: "數學(3-3 三角形的全等性質) 複習2" },
+            { time: "21:00-22:00", desc: "國文(L4 我所知道的康橋) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/16", day: "四", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "理化(3-3 水溶液的酸鹼性) 複習3" },
+            { time: "21:00-22:00", desc: "理化(3-4 酸鹼中和) 複習2" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/17", day: "五", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "理化(4-2 可逆反應與平衡) 新學習" },
+            { time: "20:00-21:00", desc: "數學(3-4 中垂線與角平分線的性質) 複習1" },
+            { time: "21:00-22:00", desc: "理化(4-1 反應速率) 複習1" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/18", day: "六", events: [
+            { time: "08:00-09:00", desc: "數學(3-5 三角形的邊角關係) 新學習" },
+            { time: "09:00-10:00", desc: "國文(L5 陋室銘) 複習4" },
+            { time: "10:00-11:00", desc: "理化(3-1 認識電解質) 複習5" },
+            { time: "11:00-12:00", desc: "英文(L4 Let's Set Up Camp Quickly) 複習3" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:00", desc: "數學錯題整理" },
+            { time: "14:00-17:30", desc: "理化家教" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:00", desc: "國文/英文 錯題整理" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:00-22:00", desc: "國文(L6 森林最優美的一天) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/19", day: "日", events: [
+            { time: "08:00-09:00", desc: "數學(3-1 三角形與多邊形的內角與外角) 複習5(總結)" },
+            { time: "09:00-09:30", desc: "數理公式默寫" },
+            { time: "09:30-12:00", desc: "英文家教" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:30", desc: "數學(3-2 尺規作圖) 複習5(總結)" },
+            { time: "14:30-15:00", desc: "社會三科 歷屆錯題回顧" },
+            { time: "15:00-16:00", desc: "地科家教" },
+            { time: "16:00-17:00", desc: "理化(3-3 水溶液的酸鹼性) 複習4" },
+            { time: "17:00-17:30", desc: "英文單字片語特訓" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:30", desc: "理化(3-4 酸鹼中和) 複習3" },
+            { time: "19:30-20:30", desc: "數學(3-3 三角形的全等性質) 複習3" },
+            { time: "20:30-21:30", desc: "國文(語文常識二 應用文-題詞/柬帖) 複習2" },
+            { time: "21:30-22:00", desc: "國文注釋默寫" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        // Week 5 
+        { date: "4/20", day: "一", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-4 中垂線與角平分線的性質) 複習2" },
+            { time: "20:00-21:00", desc: "理化(4-1 反應速率) 複習2" },
+            { time: "21:00-22:00", desc: "國文(L6 森林最優美的一天) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/21", day: "二", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "理化(4-2 可逆反應與平衡) 複習1" },
+            { time: "21:00-22:00", desc: "國文(語文常識二 應用文-題詞/柬帖) 複習3" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/22", day: "三", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-5 三角形的邊角關係) 複習1" },
+            { time: "20:00-21:00", desc: "理化(3-3 水溶液的酸鹼性) 複習5(總結)" },
+            { time: "21:00-22:00", desc: "英文(L4 Let's Set Up Camp Quickly) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/23", day: "四", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "理化(3-4 酸鹼中和) 複習4" },
+            { time: "21:00-22:00", desc: "數學(3-3 三角形的全等性質) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/24", day: "五", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-4 中垂線與角平分線的性質) 複習3" },
+            { time: "20:00-21:00", desc: "理化(4-1 反應速率) 複習3" },
+            { time: "21:00-22:00", desc: "國文(語文常識二 應用文-題詞/柬帖) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/25", day: "六", events: [
+            { time: "08:00-09:00", desc: "數學(3-5 三角形的邊角關係) 複習2" },
+            { time: "09:00-10:00", desc: "數學(3-3 三角形的全等性質) 複習5(總結)" },
+            { time: "10:00-11:00", desc: "理化(4-2 可逆反應與平衡) 複習2" },
+            { time: "11:00-12:00", desc: "理化(3-4 酸鹼中和) 複習5(總結)" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:00", desc: "考前錯題掃描" },
+            { time: "14:00-17:30", desc: "理化家教" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:00", desc: "準備家教" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:00-22:00", desc: "數學(3-4 中垂線與角平分線的性質) 複習4" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/26", day: "日", events: [
+            { time: "08:00-09:00", desc: "理化(4-1 反應速率) 複習4" },
+            { time: "09:00-09:30", desc: "英文重點單字回顧" },
+            { time: "09:30-12:00", desc: "英文家教" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:30", desc: "數學(3-5 三角形的邊角關係) 複習3" },
+            { time: "14:30-15:00", desc: "社會科考前猜題" },
+            { time: "15:00-16:00", desc: "地科家教" },
+            { time: "16:00-17:00", desc: "理化(4-2 可逆反應與平衡) 複習3" },
+            { time: "17:00-17:30", desc: "國文形音義回顧" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:30", desc: "數學(3-4 中垂線與角平分線的性質) 複習5(總結)" },
+            { time: "19:30-20:30", desc: "理化(4-1 反應速率) 複習5(總結)" },
+            { time: "20:30-21:30", desc: "數學(3-5 三角形的邊角關係) 複習4" },
+            { time: "21:30-22:00", desc: "社會三科 最後衝刺速讀" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        // Week 6 
+        { date: "4/27", day: "一", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學(3-5 三角形的邊角關係) 複習5(總結)" },
+            { time: "20:00-21:00", desc: "理化(4-2 可逆反應與平衡) 複習4" },
+            { time: "21:00-22:00", desc: "理化/數學 考前錯題特訓" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/28", day: "二", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "理化(4-2 可逆反應與平衡) 複習5(總結)" },
+            { time: "21:00-22:00", desc: "英文/國文 考前必考重點" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/29", day: "三", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "理化歷屆試題演練" },
+            { time: "20:00-21:00", desc: "數學歷屆試題與錯題本演練" },
+            { time: "21:00-22:00", desc: "社會三科 歷屆試題演練" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "4/30", day: "四", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-21:00", desc: "國文/英文 歷屆試題演練" },
+            { time: "21:00-22:00", desc: "全科 弱點盲區掃除" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "5/01", day: "五", events: [
+            { time: "08:00-12:00", desc: "全科考前大會考 (自行組卷測驗)" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-17:30", desc: "徹底檢討考卷，消滅所有盲點" },
+            { time: "17:30-18:00", desc: "運動與晚餐" },
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "數學家教" },
+            { time: "20:00-22:00", desc: "放鬆心情，調整作息" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "5/02", day: "六", events: [
+            { time: "08:00-12:00", desc: "各科精華筆記 考前精讀" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-14:00", desc: "休息準備" },
+            { time: "14:00-17:30", desc: "理化家教" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-19:00", desc: "休息準備" },
+            { time: "19:00-21:00", desc: "國文家教" },
+            { time: "21:00-22:00", desc: "放鬆與拉筋" },
+            { time: "22:00-23:00", desc: "彈性時間" }
+        ]},
+        { date: "5/03", day: "日", events: [
+            { time: "08:00-09:30", desc: "翻閱國文與英文 考前筆記" },
+            { time: "09:30-12:00", desc: "英文家教" },
+            { time: "12:00-13:30", desc: "午餐與午休" },
+            { time: "13:30-15:00", desc: "翻閱數學與理化 考前筆記" },
+            { time: "15:00-16:00", desc: "地科家教" },
+            { time: "16:00-17:30", desc: "翻閱社會科 考前筆記" },
+            { time: "17:30-18:30", desc: "運動與晚餐" },
+            { time: "18:30-21:00", desc: "確認考場考具，提早洗澡" },
+            { time: "22:00-23:00", desc: "彈性時間 (建議提早就寢)" }
+        ]},
+        { date: "5/04", day: "一", events: [
+            { time: "18:00-19:00", desc: "作業完成與考試準備" },
+            { time: "19:00-20:00", desc: "看自己整理的精華考前秘笈" },
+            { time: "20:00-21:00", desc: "看易錯字音字形與公式表" },
+            { time: "21:00-22:00", desc: "準備書包文具，平靜心情" },
+            { time: "22:00-23:00", desc: "彈性時間 (建議提早就寢)" }
+        ]}
+    ];
+
+    const app = createApp({
+        data() {
+            // 給每個任務產生獨特的 ID，用於 Firebase 辨識與儲存
+            const scheduleWithState = rawScheduleText.map(day => ({
+                ...day,
+                events: day.events.map(e => ({ 
+                    ...e, 
+                    id: `${day.date}_${e.time}`, 
+                    completed: false 
+                }))
+            }));
+
+            return {
+                selectedDay: null, 
+                scheduleData: scheduleWithState,
+                userNameInput: '',
+                currentUser: '',
+                isLoggedIn: false,
+                isLoggingIn: false,
+                historicalUsers: [] 
+            }
+        },
+        computed: {
+            groupedSchedule() {
+                const weeks = [
+                    { title: "第 1 週 (啟動週)", days: this.scheduleData.slice(0, 5) },
+                    { title: "第 2 週 (衝刺週)", days: this.scheduleData.slice(5, 12) },
+                    { title: "第 3 週 (進度收尾)", days: this.scheduleData.slice(12, 19) },
+                    { title: "第 4 週 (狂刷題找盲點)", days: this.scheduleData.slice(19, 26) },
+                    { title: "第 5 週 (錯題與模擬考)", days: this.scheduleData.slice(26, 33) },
+                    { title: "第 6 週 (終極收網週)", days: this.scheduleData.slice(33, 41) }
+                ];
+                
+                const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
+                weeks.forEach(w => w.days.forEach(d => {
+                    d.isHoliday = d.day === '六' || d.day === '日' || holidays.includes(d.date);
+                    d.dayOfWeek = d.day;
+                }));
+                return weeks;
+            }
+        },
+        mounted() {
+            this.initFirebase();
+        },
+        methods: {
+            async initFirebase() {
+                try {
+                    const firebaseApp = initializeApp(firebaseConfig);
+                    auth = getAuth(firebaseApp);
+                    db = getFirestore(firebaseApp);
+                    await signInAnonymously(auth);
+                    
+                    isFirebaseReady = true;
+
+                    const savedHistory = localStorage.getItem('schedule_historical_users');
+                    if (savedHistory) {
+                        try {
+                            this.historicalUsers = JSON.parse(savedHistory);
+                        } catch (e) {
+                            this.historicalUsers = [];
+                        }
+                    }
+
+                    const savedUser = localStorage.getItem('schedule_user_name');
+                    if (savedUser) {
+                        this.userNameInput = savedUser;
+                        this.login();
+                    }
+                } catch (error) {
+                    console.error("Firebase 初始化失敗:", error);
+                }
+            },
+            async login() {
+                if (!this.userNameInput.trim() || !isFirebaseReady) return;
+                
+                this.isLoggingIn = true;
+                this.currentUser = this.userNameInput.trim();
+                
+                try {
+                    const userDocRef = doc(db, COLLECTION_NAME, `User_${this.currentUser}`);
+                    const docSnap = await getDoc(userDocRef);
+                    
+                    if (!docSnap.exists()) {
+                        await setDoc(userDocRef, { completedTasks: [] });
+                        const globalRef = doc(db, COLLECTION_NAME, DOC_GLOBAL);
+                        await setDoc(globalRef, { users: arrayUnion(this.currentUser) }, { merge: true });
+                    }
+
+                    if (currentUserDocUnsubscribe) currentUserDocUnsubscribe();
+                    
+                    currentUserDocUnsubscribe = onSnapshot(userDocRef, (doc) => {
+                        const data = doc.data();
+                        const completedList = data?.completedTasks || [];
+                        this.syncLocalSchedule(completedList);
+                    });
+
+                    this.isLoggedIn = true;
+                    localStorage.setItem('schedule_user_name', this.currentUser);
+
+                    if (!this.historicalUsers.includes(this.currentUser)) {
+                        this.historicalUsers.push(this.currentUser);
+                        localStorage.setItem('schedule_historical_users', JSON.stringify(this.historicalUsers));
+                    }
+
+                } catch (error) {
+                    console.error("登入儲存失敗:", error);
+                    alert("登入失敗，請稍後再試。");
+                } finally {
+                    this.isLoggingIn = false;
+                }
+            },
+            quickLogin(name) {
+                this.userNameInput = name;
+                this.login();
+            },
+            logout() {
+                this.isLoggedIn = false;
+                this.currentUser = '';
+                this.userNameInput = '';
+                localStorage.removeItem('schedule_user_name');
+                if (currentUserDocUnsubscribe) {
+                    currentUserDocUnsubscribe();
+                }
+                this.syncLocalSchedule([]);
+            },
+            syncLocalSchedule(completedList) {
+                this.scheduleData.forEach(day => {
+                    day.events.forEach(event => {
+                        event.completed = completedList.includes(event.id);
+                    });
+                });
+            },
+            async toggleTask(event) {
+                if (!this.isLoggedIn) {
+                    alert('⚠️ 請先在上方輸入姓名登入，系統才能幫你儲存打勾進度喔！');
+                    return;
+                }
+
+                const isNowCompleted = !event.completed;
+                event.completed = isNowCompleted;
+
+                try {
+                    const userDocRef = doc(db, COLLECTION_NAME, `User_${this.currentUser}`);
+                    if (isNowCompleted) {
+                        await updateDoc(userDocRef, { completedTasks: arrayUnion(event.id) });
+                    } else {
+                        await updateDoc(userDocRef, { completedTasks: arrayRemove(event.id) });
+                    }
+                } catch (error) {
+                    console.error("同步至雲端失敗:", error);
+                    event.completed = !isNowCompleted;
+                }
+            },
+            openModal(day) {
+                this.selectedDay = day;
+                document.body.style.overflow = 'hidden'; 
+            },
+            closeModal() {
+                this.selectedDay = null;
+                document.body.style.overflow = 'auto'; 
+            },
+            getFormattedDate(dateStr) {
+                const parts = dateStr.split('/');
+                const mm = parts[0].padStart(2, '0');
+                const dd = parts[1].padStart(2, '0');
+                return `${mm}/${dd}`;
+            },
+            isToday(dateStr) {
+                const today = new Date();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedToday = `${mm}/${dd}`;
+                const formattedCardDate = this.getFormattedDate(dateStr);
+                
+                return formattedCardDate === formattedToday;
+            },
+            isPast(dateStr) {
+                const today = new Date();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedToday = `${mm}/${dd}`;
+                const formattedCardDate = this.getFormattedDate(dateStr);
+
+                if (formattedToday < '03/25') return false;
+                
+                return formattedCardDate < formattedToday;
+            },
+            getDayBorderColor(day, date) {
+                const holidays = ["4/03", "4/04", "4/05", "4/06", "5/01", "5/02", "5/03"];
+                if (day === '六' || day === '日' || holidays.includes(date)) return 'border-pink-300 bg-pink-50/20';
+                return 'border-indigo-300';
+            },
+            getModalHeaderColor(day) {
+                if(this.isToday(day.date)) return 'bg-yellow-100';
+                if(day.isHoliday) return 'bg-pink-50';
+                return 'bg-indigo-50';
+            },
+            getEventStyle(desc) {
+                if (desc.includes('突發') || desc.includes('延後')) return 'bg-gray-200 border-gray-400 text-gray-600 border-dashed opacity-75';
+                if (desc.includes('數學') && !desc.includes('家教')) return 'bg-blue-50 border-blue-200 text-blue-800';
+                if (desc.includes('理化') && !desc.includes('家教')) return 'bg-purple-50 border-purple-200 text-purple-800';
+                if (desc.includes('英文') && !desc.includes('家教')) return 'bg-red-50 border-red-200 text-red-800';
+                if (desc.includes('國文') && !desc.includes('家教') && !desc.includes('素養')) return 'bg-orange-50 border-orange-200 text-orange-800';
+                if (desc.includes('歷史') || desc.includes('地理') || desc.includes('公民') || desc.includes('社會')) return 'bg-green-50 border-green-200 text-green-800';
+                
+                if (desc.includes('家教')) return 'bg-yellow-50 border-yellow-300 text-yellow-800 font-bold';
+                
+                if (desc.includes('複習') || desc.includes('回顧') || desc.includes('統整') || desc.includes('新學習') || desc.includes('刷題') || desc.includes('測驗') || desc.includes('演練')) return 'bg-teal-50 border-teal-200 text-teal-900';
+                
+                if (desc.includes('午餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('睡覺') || desc.includes('運動') || desc.includes('平靜心情') || desc.includes('準備') || desc.includes('彈性') || desc.includes('素養閱讀')) return 'bg-gray-100 border-gray-200 text-gray-500 border-dashed';
+
+                return 'bg-white border-gray-200 text-gray-700'; 
+            },
+            formatDesc(desc) {
+                // 將「新學習」獨立出來，套用紅色標籤
+                let formatted = desc.replace(/(新學習)/g, '<span class="font-black text-red-700 bg-red-100 px-1 rounded">$1</span>');
+                // 增加 複習1~5 與融合複習 的正規表達式捕捉
+                formatted = formatted.replace(/(複習[1-5]|複習|回顧|統整|刷題|演練|測驗|計時模擬考)/g, '<span class="font-black text-indigo-700 bg-indigo-100 px-1 rounded">$1</span>');
+                // 科目名稱加粗
+                formatted = formatted.replace(/(數學|理化|英文|國文|歷史|地理|公民|地科|社會|文言文)/g, '<span class="font-bold">$1</span>');
+                return formatted;
+            }
+        }
+    });
+
+    app.mount('#app');
+</script>
+</body>
+</html>
