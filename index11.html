@@ -99,49 +99,48 @@
         
         <!-- Weeks Grid -->
         <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-700 flex items-center border-b-4 border-indigo-200 pb-3">
-                <i class="fas fa-calendar-week mr-3 text-indigo-500"></i> {{ week.title }}
+            <h2 class="text-xl font-bold mb-4 text-gray-700 flex items-center border-b-2 border-indigo-200 pb-2">
+                <i class="fas fa-calendar-week mr-2 text-indigo-500"></i> {{ week.title }}
             </h2>
             
-            <!-- 將網格設定為 4 欄，7天會自然分成 4天 + 3天 兩排 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <div v-for="day in week.days" :key="day.date" 
                      @click="openModal(day)"
-                     class="bg-white rounded-2xl shadow-md border-t-8 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col h-full relative"
+                     class="bg-white rounded-xl shadow border-t-4 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative"
                      :class="[
                          getDayBorderColor(day.dayOfWeek, day.date), 
                          isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '',
                          isPast(day.date) && !isToday(day.date) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
                      ]">
                     
-                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center shrink-0">
-                        <div class="font-black text-gray-800 text-2xl md:text-3xl flex items-center tracking-wide">
-                            {{ day.date }} <span class="text-lg md:text-xl text-gray-500 ml-2 mr-3">({{ day.dayOfWeek }})</span>
-                            <span v-if="isToday(day.date)" class="text-sm md:text-base bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full animate-pulse">今日</span>
+                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center shrink-0">
+                        <div class="font-bold text-gray-800 text-lg flex items-center">
+                            {{ day.date }} <span class="text-sm text-gray-500 ml-1 mr-2">({{ day.dayOfWeek }})</span>
+                            <span v-if="isToday(day.date)" class="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full animate-pulse">今日</span>
                         </div>
-                        <div v-if="day.isHoliday" class="text-sm md:text-base font-bold bg-pink-100 text-pink-700 px-3 py-1 rounded-full shadow-sm">
+                        <div v-if="day.isHoliday" class="text-xs font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full shadow-sm">
                             旅遊/假日
                         </div>
                     </div>
 
-                    <div class="p-3 md:p-4 space-y-3 flex-grow overflow-y-auto max-h-[450px] hide-scrollbar">
+                    <div class="p-2 space-y-2 flex-grow overflow-y-auto max-h-[300px] hide-scrollbar">
                         <div v-for="(event, eIndex) in day.events" :key="event.id" 
                              @click.stop="toggleTask(event)"
-                             class="text-base md:text-lg flex flex-row p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:shadow-md"
+                             class="text-sm flex flex-row p-2 rounded border transition-all duration-200 cursor-pointer hover:shadow-sm"
                              :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
                             
-                            <div class="pt-1 mr-3">
-                                <div class="w-6 h-6 md:w-7 md:h-7 rounded border-2 flex items-center justify-center transition-colors duration-200"
+                            <div class="pt-0.5 mr-2">
+                                <div class="w-5 h-5 rounded border flex items-center justify-center transition-colors duration-200"
                                      :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
-                                     <i v-if="event.completed" class="fas fa-check text-white text-sm md:text-base"></i>
+                                     <i v-if="event.completed" class="fas fa-check text-white text-xs"></i>
                                 </div>
                             </div>
 
                             <div class="flex-grow flex flex-col select-none">
-                                <div class="font-mono text-sm md:text-base font-semibold opacity-75 mb-1.5 flex items-center">
-                                    <i class="far fa-clock mr-1.5"></i> {{ event.time }}
+                                <div class="font-mono text-xs font-semibold opacity-70 mb-1 flex items-center">
+                                    <i class="far fa-clock mr-1"></i> {{ event.time }}
                                 </div>
-                                <div class="text-base md:text-xl font-bold leading-relaxed tracking-wide" v-html="formatDesc(event.desc)"></div>
+                                <div class="font-medium leading-relaxed tracking-wide" v-html="formatDesc(event.desc)"></div>
                             </div>
                         </div>
                     </div>
@@ -317,27 +316,27 @@
             "國文 單元64~67 (文言文題組、雙文閱讀測驗)"
         ];
 
-        // 將 5/25 ~ 6/18 的進度整合為 Date 字典，方便對應
-        const preSummerMap = {
-            "5/25": "國文 單元1(「相似詞語」的分辨)",
-            "5/27": "國文 單元2(「形近字」的分辨)",
-            "5/28": "國文 單元3(「音近字」的分辨)",
-            "6/01": "國文 單元4(重要詞語辨正)",
-            "6/03": "國文 單元1~4練習題",
-            "6/04": "國文 單元5(相似字「字音」辨正)",
-            "6/08": "國文 單元6(一字多音辨正)",
-            "6/10": "國文 單元7(重要讀音辨正)",
-            "6/11": "國文 單元6~7練習題",
-            "6/15": "國文 單元8(造字法則)",
-            "6/17": "國文 單元9(漢字形體的演變)",
-            "6/18": "國文 單元8~9練習題"
-        };
-
         let mI = 0, sI = 0, eI = 0, socI = 0, cI = 0, cM = 1;
 
-        const schedule = [];
-        let curr = new Date(2026, 4, 25); // 從 2026/05/25 (星期一) 開始
-        const end = new Date(2026, 7, 30); // 到 2026/08/30 (星期日) 結束
+        // 5/25 ~ 6/18 的國文前期進度
+        const preSummer = [
+            { date: "5/25", day: "一", events: [{ time: "22:00-23:00", desc: "國文 單元1(「相似詞語」的分辨)" }] },
+            { date: "5/27", day: "三", events: [{ time: "22:00-23:00", desc: "國文 單元2(「形近字」的分辨)" }] },
+            { date: "5/28", day: "四", events: [{ time: "22:00-23:00", desc: "國文 單元3(「音近字」的分辨)" }] },
+            { date: "6/01", day: "一", events: [{ time: "22:00-23:00", desc: "國文 單元4(重要詞語辨正)" }] },
+            { date: "6/03", day: "三", events: [{ time: "22:00-23:00", desc: "國文 單元1~4練習題" }] },
+            { date: "6/04", day: "四", events: [{ time: "22:00-23:00", desc: "國文 單元5(相似字「字音」辨正)" }] },
+            { date: "6/08", day: "一", events: [{ time: "22:00-23:00", desc: "國文 單元6(一字多音辨正)" }] },
+            { date: "6/10", day: "三", events: [{ time: "22:00-23:00", desc: "國文 單元7(重要讀音辨正)" }] },
+            { date: "6/11", day: "四", events: [{ time: "22:00-23:00", desc: "國文 單元6~7練習題" }] },
+            { date: "6/15", day: "一", events: [{ time: "22:00-23:00", desc: "國文 單元8(造字法則)" }] },
+            { date: "6/17", day: "三", events: [{ time: "22:00-23:00", desc: "國文 單元9(漢字形體的演變)" }] },
+            { date: "6/18", day: "四", events: [{ time: "22:00-23:00", desc: "國文 單元8~9練習題" }] }
+        ];
+
+        const schedule = [...preSummer];
+        let curr = new Date(2026, 5, 29); // 2026/06/29
+        const end = new Date(2026, 7, 30); // 2026/08/30
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -346,80 +345,72 @@
             const dayOfWeek = curr.getDay();
             const dayName = dayNames[dayOfWeek];
 
+            const isFamilyTrip1 = (dateStr === "7/16");
+            const isFamilyTrip2 = (dateStr === "8/06");
+            const isPenghu = (dateStr === "8/22" || dateStr === "8/23" || dateStr === "8/24");
+
             let events = [];
 
-            if (curr < new Date(2026, 5, 29)) {
-                // 5/25 ~ 6/28 期間：暖身與考後休息週
-                if (preSummerMap[dateStr]) {
-                    events.push({ time: "22:00-23:00", desc: preSummerMap[dateStr] });
-                }
+            if (isPenghu) {
+                events.push({ time: "全天", desc: "🏖️ 澎湖之旅 (暫停進度)" });
+            } else if (isFamilyTrip1 || isFamilyTrip2) {
+                events.push({ time: "全天", desc: "🚗 家庭旅遊日 (暫停進度)" });
             } else {
-                // 6/29 起：暑假衝刺進度
-                const isFamilyTrip1 = (dateStr === "7/16");
-                const isFamilyTrip2 = (dateStr === "8/06");
-                const isPenghu = (dateStr === "8/22" || dateStr === "8/23" || dateStr === "8/24");
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon - Fri
+                    events.push({ time: "07:00-07:30", desc: "早餐" });
+                    events.push({ time: "07:30-08:00", desc: "成語/英文單字背誦" });
 
-                if (isPenghu) {
-                    events.push({ time: "全天", desc: "🏖️ 澎湖之旅 (暫停進度)" });
-                } else if (isFamilyTrip1 || isFamilyTrip2) {
-                    events.push({ time: "全天", desc: "🚗 家庭旅遊日 (暫停進度)" });
-                } else {
-                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon - Fri
-                        events.push({ time: "07:00-07:30", desc: "早餐" });
-                        events.push({ time: "07:30-08:00", desc: "成語/英文單字背誦" });
+                    let mathDesc = mI < mathTopics.length ? mathTopics[mI++] : `數學 (彈性複習)`;
+                    events.push({ time: "08:00-10:00", desc: mathDesc });
 
-                        let mathDesc = mI < mathTopics.length ? mathTopics[mI++] : `數學 (彈性複習)`;
-                        events.push({ time: "08:00-10:00", desc: mathDesc });
-
-                        let chiDesc;
-                        if (curr <= new Date(2026, 7, 10)) {
-                            chiDesc = cI < chiTopics.length ? chiTopics[cI++] : "國文 (彈性複習)";
-                        } else {
-                            chiDesc = `國文科 第${cM++}次模擬考`;
-                        }
-                        events.push({ time: "10:00-12:00", desc: chiDesc });
-
-                        events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
-
-                        let sciDesc = sI < sciTopics.length ? sciTopics[sI++] : `自然 (彈性複習)`;
-                        events.push({ time: "13:30-15:00", desc: sciDesc });
-
-                        let engDesc = eI < engTopics.length ? engTopics[eI++] : `英文 (彈性複習)`;
-                        events.push({ time: "15:00-17:00", desc: engDesc });
-
-                        events.push({ time: "17:00-18:00", desc: "運動+洗澡+晚餐" });
-
-                        if (dayOfWeek === 1 || dayOfWeek === 4) { // Mon, Thu
-                            events.push({ time: "18:00-20:00", desc: "複習鍾揚理化上課內容" });
-                        } else if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 5) { // Tue, Wed, Fri
-                            events.push({ time: "18:00-20:00", desc: "數學家教" });
-                        }
-                        
-                        let socDesc = socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
-                        events.push({ time: "20:00-21:30", desc: socDesc });
-                        
-                        events.push({ time: "21:30-22:30", desc: "彈性時間" });
-                    } else if (dayOfWeek === 6) { // Sat
-                        events.push({ time: "07:30-08:30", desc: "早餐" });
-                        events.push({ time: "08:30-10:00", desc: "英文/國文閱讀練習" });
-                        events.push({ time: "10:00-12:00", desc: "英文家教" });
-                        events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
-                        events.push({ time: "13:30-17:00", desc: "鍾揚理化補習班進度班" });
-                        events.push({ time: "17:00-17:30", desc: "休息" });
-                        events.push({ time: "17:30-19:00", desc: "運動+洗澡+晚餐" });
-                        events.push({ time: "19:00-21:30", desc: "國文家教" });
-                        events.push({ time: "21:30-22:30", desc: "彈性時間" });
-                    } else if (dayOfWeek === 0) { // Sun
-                        events.push({ time: "07:30-08:30", desc: "早餐" });
-                        events.push({ time: "08:30-12:00", desc: "鍾揚理化補習班總複習班上課" });
-                        events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
-                        events.push({ time: "13:30-15:00", desc: "複習國文家教上課內容" });
-                        events.push({ time: "15:00-17:00", desc: "地球科學家教" });
-                        events.push({ time: "17:00-19:00", desc: "外出用餐" });
-                        events.push({ time: "19:00-20:30", desc: "複習鍾揚理化上課內容" });
-                        events.push({ time: "20:30-21:30", desc: "複習英文家教上課內容" });
-                        events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                    let chiDesc;
+                    if (curr <= new Date(2026, 7, 10)) {
+                        chiDesc = cI < chiTopics.length ? chiTopics[cI++] : "國文 (彈性複習)";
+                    } else {
+                        chiDesc = `國文科 第${cM++}次模擬考`;
                     }
+                    events.push({ time: "10:00-12:00", desc: chiDesc });
+
+                    events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
+
+                    let sciDesc = sI < sciTopics.length ? sciTopics[sI++] : `自然 (彈性複習)`;
+                    events.push({ time: "13:30-15:00", desc: sciDesc });
+
+                    let engDesc = eI < engTopics.length ? engTopics[eI++] : `英文 (彈性複習)`;
+                    events.push({ time: "15:00-17:00", desc: engDesc });
+
+                    events.push({ time: "17:00-18:00", desc: "運動+洗澡+晚餐" });
+
+                    if (dayOfWeek === 1 || dayOfWeek === 4) { // Mon, Thu
+                        events.push({ time: "18:00-20:00", desc: "複習鍾揚理化上課內容" });
+                    } else if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 5) { // Tue, Wed, Fri
+                        events.push({ time: "18:00-20:00", desc: "數學家教" });
+                    }
+                    
+                    let socDesc = socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
+                    events.push({ time: "20:00-21:30", desc: socDesc });
+                    
+                    events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                } else if (dayOfWeek === 6) { // Sat
+                    events.push({ time: "07:30-08:30", desc: "早餐" });
+                    events.push({ time: "08:30-10:00", desc: "英文/國文閱讀練習" });
+                    events.push({ time: "10:00-12:00", desc: "英文家教" });
+                    events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
+                    events.push({ time: "13:30-17:00", desc: "鍾揚理化補習班進度班" });
+                    events.push({ time: "17:00-17:30", desc: "休息" });
+                    events.push({ time: "17:30-19:00", desc: "運動+洗澡+晚餐" });
+                    events.push({ time: "19:00-21:30", desc: "國文家教" });
+                    events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                } else if (dayOfWeek === 0) { // Sun
+                    events.push({ time: "07:30-08:30", desc: "早餐" });
+                    events.push({ time: "08:30-12:00", desc: "鍾揚理化補習班總複習班上課" });
+                    events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
+                    events.push({ time: "13:30-15:00", desc: "複習國文家教上課內容" });
+                    events.push({ time: "15:00-17:00", desc: "地球科學家教" });
+                    events.push({ time: "17:00-19:00", desc: "外出用餐" });
+                    events.push({ time: "19:00-20:30", desc: "複習鍾揚理化上課內容" });
+                    events.push({ time: "20:30-21:30", desc: "複習英文家教上課內容" });
+                    events.push({ time: "21:30-22:30", desc: "彈性時間" });
                 }
             }
 
@@ -454,22 +445,11 @@
         computed: {
             groupedSchedule() {
                 const weeks = [];
-                // 動態將排程以每7天為一組
+                // 動態將排程以每7天為一組，對應真實的週數
                 for(let i = 0; i < this.scheduleData.length; i += 7) {
                     const weekDays = this.scheduleData.slice(i, i + 7);
-                    const weekIndex = Math.floor(i / 7);
-                    let title = "";
-                    
-                    if (weekIndex < 4) {
-                        title = `第 ${weekIndex + 1} 週 暖身週`;
-                    } else if (weekIndex === 4) {
-                        title = `第 5 週 考前準備與休息週`;
-                    } else {
-                        title = `第 ${weekIndex - 4} 週 衝刺進度`;
-                    }
-
                     weeks.push({
-                        title: title,
+                        title: `第 ${Math.floor(i / 7) + 1} 週 衝刺進度`,
                         days: weekDays
                     });
                 }
