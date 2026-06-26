@@ -25,6 +25,7 @@
             border-color: #facc15 !important;
             transform: scale(1.02);
             z-index: 10;
+            scroll-margin-top: 120px;
         }
         /* 打勾後的視覺變化 */
         .task-completed {
@@ -485,8 +486,21 @@
         },
         mounted() {
             this.initFirebase();
+            this.scrollToToday();
         },
         methods: {
+            scrollToToday() {
+                this.$nextTick(() => {
+                    // 稍微延遲以確保所有的 DOM 節點與樣式都已完整渲染
+                    setTimeout(() => {
+                        const todayCard = document.querySelector('.glow-today');
+                        if (todayCard) {
+                            // 平滑滾動到今天的卡片，並搭配 CSS scroll-margin-top 避開上方導覽列
+                            todayCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 500);
+                });
+            },
             async initFirebase() {
                 try {
                     const firebaseApp = initializeApp(firebaseConfig);
