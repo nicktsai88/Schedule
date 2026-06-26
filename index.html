@@ -305,8 +305,7 @@
             "6/18": "國文 單元8~9練習題"
         };
 
-        let mI = 0, sI = 0, eI = 0, socI = 0, cI = 0;
-        let cM = 1; // 補回缺失的國文模擬考計數器變數
+        let mI = 0, sI = 0, eI = 0, socI = 0, cI = 0, cM = 1;
 
         const schedule = [];
         let curr = new Date(2026, 4, 25); // 從 2026/05/25 (星期一) 開始
@@ -321,15 +320,16 @@
 
             let events = [];
 
-            if (curr < new Date(2026, 5, 30)) {
-                // 5/25 ~ 6/29 期間：暖身與考後休息週 (進度暫不推進)
+            if (curr < new Date(2026, 5, 29)) {
+                // 5/25 ~ 6/28 期間：暖身與考後休息週
                 if (preSummerMap[dateStr]) {
                     events.push({ time: "22:00-23:00", desc: preSummerMap[dateStr] });
-                } else if (dateStr === "6/29") {
-                    events.push({ time: "全天", desc: "學校作息 / 準備暑假衝刺" });
                 }
             } else {
-                // 6/30 起：暑假衝刺進度正式開始 (單元由1開始推進)
+                // 6/29 起：暑假衝刺進度
+                // 6/30 起才開始真正推進各科單元
+                const advanceProgress = curr >= new Date(2026, 5, 30);
+                
                 const isFamilyTrip1 = (dateStr === "7/16");
                 const isFamilyTrip2 = (dateStr === "8/06");
                 const isPenghu = (dateStr === "8/22" || dateStr === "8/23" || dateStr === "8/24");
@@ -339,74 +339,82 @@
                 } else if (isFamilyTrip1 || isFamilyTrip2) {
                     events.push({ time: "全天", desc: "🚗 家庭旅遊日 (暫停進度)" });
                 } else {
-                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // 星期一 ~ 星期五
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon - Fri
                         events.push({ time: "07:00-07:30", desc: "早餐" });
                         events.push({ time: "07:30-08:00", desc: "成語/英文單字背誦" });
-                        
+
                         if (dayOfWeek === 4) {
-                            // 星期四：各科彈性時間 (停止消耗陣列進度)
+                            // 星期四：全面彈性時間，不推進主科陣列進度
                             events.push({ time: "08:00-10:00", desc: "數學彈性時間" });
                             events.push({ time: "10:00-12:00", desc: "國文彈性時間" });
-                            events.push({ time: "12:00-13:00", desc: "中餐+午睡" });
-                            events.push({ time: "13:00-15:00", desc: "自然彈性時間" });
+                            events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
+                            events.push({ time: "13:30-15:00", desc: "生物/理化彈性時間" });
                             events.push({ time: "15:00-17:00", desc: "英文彈性時間" });
                             events.push({ time: "17:00-18:00", desc: "運動+洗澡+晚餐" });
-                            events.push({ time: "18:00-21:30", desc: "社會科彈性時間" });
-                            events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                            events.push({ time: "18:00-20:00", desc: "歷史/地理/公民彈性時間" });
+                            
+                            // 唯獨晚上20:00-22:00依然推進社會科
+                            let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
+                            let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
+                            events.push({ time: "20:00-21:00", desc: socDesc1 });
+                            events.push({ time: "21:00-22:00", desc: socDesc2 });
+                            events.push({ time: "22:00-22:30", desc: "彈性時間" });
                         } else {
-                            // 其他平日：正常消耗進度
-                            let mathDesc = mI < mathTopics.length ? mathTopics[mI++] : `數學 (彈性複習)`;
+                            // 星期一、二、三、五：正常推進進度
+                            let mathDesc = advanceProgress && mI < mathTopics.length ? mathTopics[mI++] : `數學 (彈性複習)`;
                             events.push({ time: "08:00-10:00", desc: mathDesc });
 
                             let chiDesc;
                             if (curr <= new Date(2026, 7, 10)) {
-                                chiDesc = cI < chiTopics.length ? chiTopics[cI++] : "國文 (自行安排)";
+                                chiDesc = advanceProgress && cI < chiTopics.length ? chiTopics[cI++] : "國文 (彈性複習)";
                             } else {
                                 chiDesc = `國文科 第${cM++}次模擬考`;
                             }
                             events.push({ time: "10:00-12:00", desc: chiDesc });
 
-                            events.push({ time: "12:00-13:00", desc: "中餐+午睡" });
+                            events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
 
-                            let sciDesc = sI < sciTopics.length ? sciTopics[sI++] : `自然 (彈性複習)`;
-                            events.push({ time: "13:00-15:00", desc: sciDesc });
+                            let sciDesc = advanceProgress && sI < sciTopics.length ? sciTopics[sI++] : `自然 (彈性複習)`;
+                            events.push({ time: "13:30-15:00", desc: sciDesc });
 
-                            let engDesc = eI < engTopics.length ? engTopics[eI++] : `英文 (彈性複習)`;
+                            let engDesc = advanceProgress && eI < engTopics.length ? engTopics[eI++] : `英文 (彈性複習)`;
                             events.push({ time: "15:00-17:00", desc: engDesc });
 
                             events.push({ time: "17:00-18:00", desc: "運動+洗澡+晚餐" });
 
-                            if (dayOfWeek === 1) { // 星期一
+                            if (dayOfWeek === 1) { // Mon
                                 events.push({ time: "18:00-19:30", desc: "複習鍾揚理化上課內容" });
                                 events.push({ time: "19:30-22:00", desc: "數學家教" });
-                            } else if (dayOfWeek === 2 || dayOfWeek === 5) { // 星期二、星期五
-                                events.push({ time: "18:00-20:00", desc: "數學家教" });
-                                let socDesc = socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
-                                events.push({ time: "20:00-21:30", desc: socDesc });
-                            } else if (dayOfWeek === 3) { // 星期三
-                                events.push({ time: "18:00-19:30", desc: "複習鍾揚理化上課內容" });
-                                let socDesc = socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
-                                events.push({ time: "19:30-21:30", desc: socDesc });
+                                events.push({ time: "22:00-22:30", desc: "彈性時間" });
+                            } else if (dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 5) { // Tue, Wed, Fri
+                                if (dayOfWeek === 2 || dayOfWeek === 5) {
+                                    events.push({ time: "18:00-20:00", desc: "數學家教" });
+                                } else if (dayOfWeek === 3) {
+                                    events.push({ time: "18:00-20:00", desc: "複習鍾揚理化上課內容" });
+                                }
+                                
+                                // 社會科拆分為 [歷史/地理/公民] 1 與 2，一次抽出兩個不同科目單元
+                                let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
+                                let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
+                                events.push({ time: "20:00-21:00", desc: socDesc1 });
+                                events.push({ time: "21:00-22:00", desc: socDesc2 });
+                                events.push({ time: "22:00-22:30", desc: "彈性時間" });
                             }
-                            events.push({ time: "21:30-22:30", desc: "彈性時間" });
                         }
-                    } else if (dayOfWeek === 6) { // 星期六
-                        events.push({ time: "07:30-08:00", desc: "早餐" });
-                        events.push({ time: "08:00-10:00", desc: "英文/國文閱讀練習" });
+                    } else if (dayOfWeek === 6) { // Sat
+                        events.push({ time: "07:30-08:30", desc: "早餐" });
+                        events.push({ time: "08:30-10:00", desc: "英文/國文閱讀練習" });
                         events.push({ time: "10:00-12:00", desc: "英文家教" });
                         events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
                         events.push({ time: "13:30-17:30", desc: "鍾揚理化補習班進度班" });
                         events.push({ time: "17:30-19:00", desc: "運動+洗澡+晚餐" });
                         events.push({ time: "19:00-21:30", desc: "吳敏男線上國文課" });
                         events.push({ time: "21:30-22:30", desc: "彈性時間" });
-                    } else if (dayOfWeek === 0) { // 星期日
-                        events.push({ time: "07:30-08:00", desc: "早餐" });
-                        events.push({ time: "08:00-12:00", desc: "鍾揚理化補習班總複習班上課" });
+                    } else if (dayOfWeek === 0) { // Sun
+                        events.push({ time: "07:30-08:30", desc: "早餐" });
+                        events.push({ time: "08:30-12:00", desc: "鍾揚理化補習班總複習班上課" });
                         events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
-                        
-                        let socDesc = socI < socTopics.length ? socTopics[socI++] : `社會 (彈性複習)`;
-                        events.push({ time: "13:30-15:00", desc: socDesc });
-                        
+                        events.push({ time: "13:30-15:00", desc: "彈性時間" });
                         events.push({ time: "15:00-17:00", desc: "地球科學家教" });
                         events.push({ time: "17:00-19:00", desc: "外出用餐" });
                         events.push({ time: "19:00-20:30", desc: "複習鍾揚理化上課內容" });
@@ -635,15 +643,15 @@
                 // 旅遊或暫停項目
                 if (desc.includes('暫停') || desc.includes('延後')) return 'bg-gray-100 border-gray-200 text-gray-500';
 
-                // 2. 成語/英文單字背誦、閱讀練習和彈性時間 -> 使用同一種專屬淺色系 (淺藍綠色)
-                if (desc.includes('背誦') || desc.includes('閱讀練習') || desc.includes('彈性')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+                // 2. 嚴格比對單純的「彈性時間」，以及背誦閱讀。這樣才不會讓"數學彈性時間"誤判成這裡的青色。
+                if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('閱讀練習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
 
                 // 1. 所有生活作息 -> 改使用更柔和溫馨的暖色系 (玫瑰暖粉色)
                 if (desc.includes('早餐') || desc.includes('中餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('洗澡') || desc.includes('運動') || desc.includes('用餐') || desc.includes('準備') || desc.includes('午睡')) return 'bg-rose-50 border-rose-200 text-rose-700';
                 
-                // 相同科目的進度全部統一使用專屬顏色 (包含家教、補習班、模擬考等皆使用該科專屬色)
+                // 相同科目的進度全部統一使用專屬顏色 (包含家教、補習班、模擬考、以及帶有該科名稱的「彈性時間」)
                 if (desc.includes('數學')) return 'bg-blue-50 border-blue-200 text-blue-800';
-                if (desc.includes('自然') || desc.includes('理化') || desc.includes('地球科學')) return 'bg-purple-50 border-purple-200 text-purple-800';
+                if (desc.includes('自然') || desc.includes('理化') || desc.includes('地球科學') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文')) return 'bg-red-50 border-red-200 text-red-800';
                 if (desc.includes('國文')) return 'bg-orange-50 border-orange-200 text-orange-800';
                 if (desc.includes('社會') || desc.includes('歷史') || desc.includes('地理') || desc.includes('公民')) return 'bg-green-50 border-green-200 text-green-800';
