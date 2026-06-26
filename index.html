@@ -331,11 +331,17 @@
                 // 6/30 起才開始真正推進各科單元
                 const advanceProgress = curr >= new Date(2026, 5, 30);
                 
-                const isFamilyTrip1 = (dateStr === "7/16");
-                const isFamilyTrip2 = (dateStr === "8/06");
+                const isFinalExam = (dateStr === "6/29");
+                const isTaichung = (dateStr === "7/01" || dateStr === "7/02");
+                const isFamilyTrip1 = (dateStr === "7/15");
+                const isFamilyTrip2 = (dateStr === "8/05");
                 const isPenghu = (dateStr === "8/22" || dateStr === "8/23" || dateStr === "8/24");
 
-                if (isPenghu) {
+                if (isFinalExam) {
+                    events.push({ time: "全天", desc: "📝 學校期末考 (暫停進度)" });
+                } else if (isTaichung) {
+                    events.push({ time: "全天", desc: "🚗 台中之旅 (暫停進度)" });
+                } else if (isPenghu) {
                     events.push({ time: "全天", desc: "🏖️ 澎湖之旅 (暫停進度)" });
                 } else if (isFamilyTrip1 || isFamilyTrip2) {
                     events.push({ time: "全天", desc: "🚗 家庭旅遊日 (暫停進度)" });
