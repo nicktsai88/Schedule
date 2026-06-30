@@ -4,23 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏆 決戰會考 國二升國三暑假衝刺計畫</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f3f4f6;
         }
-        
-        /* 防止 Vue 渲染前的閃爍 */
-        [v-cloak] {
-            display: none !important;
-        }
-
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -28,7 +19,6 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
         /* 今日專屬發光外框動畫 */
         .glow-today {
             box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6);
@@ -37,7 +27,6 @@
             z-index: 10;
             scroll-margin-top: 120px;
         }
-        
         /* 打勾後的視覺變化 */
         .task-completed {
             opacity: 0.6;
@@ -46,7 +35,6 @@
             border-color: #e5e7eb !important;
             color: #9ca3af !important;
         }
-        
         /* 自定義彈出視窗動畫 */
         .modal-enter-active, .modal-leave-active {
             transition: all 0.3s ease;
@@ -54,55 +42,6 @@
         .modal-enter-from, .modal-leave-to {
             opacity: 0;
             transform: scale(0.95);
-        }
-
-        /* 列印專用樣式 (A4 直式) */
-        @media print {
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                background-color: white !important;
-            }
-            body * {
-                visibility: hidden;
-            }
-            .modal-overlay-print, .modal-overlay-print * {
-                visibility: visible;
-            }
-            .modal-overlay-print {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                background: transparent !important;
-                backdrop-filter: none !important;
-                padding: 0 !important;
-                align-items: flex-start !important;
-                width: 100% !important;
-                height: auto !important;
-            }
-            .modal-print-area {
-                position: relative;
-                width: 100%;
-                max-width: 100% !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow: visible !important;
-                box-shadow: none !important;
-                border: none !important;
-            }
-            /* 讓捲動區域在列印時完全展開 */
-            .modal-print-area .overflow-y-auto {
-                overflow: visible !important;
-                max-height: none !important;
-            }
-            /* 隱藏不需要列印的元素 (如按鈕) */
-            .print-hide, .print-hide * {
-                display: none !important;
-            }
-            @page {
-                size: A4 portrait;
-                margin: 15mm;
-            }
         }
     </style>
 </head>
@@ -116,7 +55,7 @@
                 <h1 class="text-2xl font-black tracking-wider flex items-center">
                     <i class="fas fa-trophy text-yellow-400 mr-2"></i>決戰會考 暑假衝刺計畫
                 </h1>
-                <p class="text-blue-100 text-sm mt-1">執行期間：6/29 ～ 8/30 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
+                <p class="text-blue-100 text-sm mt-1">執行期間：5/25 ～ 8/30 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
             </div>
             
             <!-- 使用者登入區塊 -->
@@ -158,6 +97,7 @@
 
     <!-- Main Content -->
     <main class="w-full px-3 md:px-5 lg:px-8 py-6">
+        
         <!-- Weeks Grid -->
         <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-700 flex items-center border-b-4 border-indigo-200 pb-3">
@@ -213,17 +153,17 @@
 
     <!-- 彈出式閱讀視窗 (Modal) -->
     <transition name="modal">
-        <div v-if="selectedDay" class="modal-overlay-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
-            <div class="modal-print-area bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div v-if="selectedDay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 
                 <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center" :class="getModalHeaderColor(selectedDay)">
                     <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                         <i class="fas fa-calendar-day mr-3 opacity-70"></i>
                         {{ selectedDay.date }} ({{ selectedDay.dayOfWeek }}) 詳細進度
                         <span v-if="selectedDay.isHoliday" class="ml-3 text-sm font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full">旅遊/假日</span>
-                        <span v-if="isToday(selectedDay.date)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full print-hide">✨ 就是今天</span>
+                        <span v-if="isToday(selectedDay.date)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">✨ 就是今天</span>
                     </h3>
-                    <button @click="closeModal" class="print-hide text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -250,12 +190,9 @@
                     </div>
                 </div>
                 
-                <div class="px-6 py-4 border-t border-gray-200 bg-white flex justify-center gap-4 print-hide">
+                <div class="px-6 py-4 border-t border-gray-200 bg-white text-center">
                     <button @click="closeModal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
                         確認並關閉
-                    </button>
-                    <button @click="printModal" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
-                        <i class="fas fa-print"></i> 列印
                     </button>
                 </div>
             </div>
@@ -372,8 +309,8 @@
         let mI = 0, sI = 0, eI = 0, socI = 0, cI = 0, cM = 1;
 
         const schedule = [];
-        let curr = new Date(2026, 5, 29); // 從 2026/06/29 開始
-        const end = new Date(2026, 7, 30); // 到 2026/08/30 結束
+        let curr = new Date(2026, 4, 25); // 從 2026/06/30 (星期一) 開始
+        const end = new Date(2026, 7, 30); // 到 2026/08/30 (星期日) 結束
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -530,7 +467,15 @@
                 for(let i = 0; i < this.scheduleData.length; i += 7) {
                     const weekDays = this.scheduleData.slice(i, i + 7);
                     const weekIndex = Math.floor(i / 7);
-                    let title = `第 ${weekIndex + 1} 週 衝刺進度`;
+                    let title = "";
+                    
+                    if (weekIndex < 4) {
+                        title = `第 ${weekIndex + 1} 週 暖身週`;
+                    } else if (weekIndex === 4) {
+                        title = `第 5 週 考前準備與休息週`;
+                    } else {
+                        title = `第 ${weekIndex - 4} 週 衝刺進度`;
+                    }
 
                     weeks.push({
                         title: title,
@@ -624,8 +569,7 @@
 
                 } catch (error) {
                     console.error("登入儲存失敗:", error);
-                    // 避免 iframe 環境中的 alert()
-                    console.warn("登入失敗，請稍後再試。"); 
+                    alert("登入失敗，請稍後再試。");
                 } finally {
                     this.isLoggingIn = false;
                 }
@@ -653,8 +597,7 @@
             },
             async toggleTask(event) {
                 if (!this.isLoggedIn) {
-                    // 使用自訂提示避免 alert 鎖死頁面
-                    console.warn('⚠️ 請先在上方輸入姓名登入，系統才能幫你儲存打勾進度喔！');
+                    alert('⚠️ 請先在上方輸入姓名登入，系統才能幫你儲存打勾進度喔！');
                     return;
                 }
 
@@ -681,9 +624,6 @@
                 this.selectedDay = null;
                 document.body.style.overflow = 'auto'; 
             },
-            printModal() {
-                window.print();
-            },
             getFormattedDate(dateStr) {
                 const parts = dateStr.split('/');
                 const mm = parts[0].padStart(2, '0');
@@ -706,7 +646,7 @@
                 const formattedToday = `${mm}/${dd}`;
                 const formattedCardDate = this.getFormattedDate(dateStr);
 
-                if (formattedToday < '06/29') return false;
+                if (formattedToday < '05/25') return false;
                 
                 return formattedCardDate < formattedToday;
             },
@@ -724,13 +664,13 @@
                 // 旅遊或暫停項目
                 if (desc.includes('暫停') || desc.includes('延後')) return 'bg-gray-100 border-gray-200 text-gray-500';
 
-                // 嚴格比對單純的「彈性時間」，以及背誦閱讀。
+                // 2. 嚴格比對單純的「彈性時間」，以及背誦閱讀。這樣才不會讓"數學彈性時間"誤判成這裡的青色。
                 if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('閱讀練習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
 
-                // 所有生活作息 -> 柔和溫馨的暖色系 (玫瑰暖粉色)
+                // 1. 所有生活作息 -> 改使用更柔和溫馨的暖色系 (玫瑰暖粉色)
                 if (desc.includes('早餐') || desc.includes('中餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('洗澡') || desc.includes('運動') || desc.includes('用餐') || desc.includes('準備') || desc.includes('午睡')) return 'bg-rose-50 border-rose-200 text-rose-700';
                 
-                // 相同科目的進度全部統一使用專屬顏色 
+                // 相同科目的進度全部統一使用專屬顏色 (包含家教、補習班、模擬考、以及帶有該科名稱的「彈性時間」)
                 if (desc.includes('數學')) return 'bg-blue-50 border-blue-200 text-blue-800';
                 if (desc.includes('自然') || desc.includes('理化') || desc.includes('地球科學') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文')) return 'bg-red-50 border-red-200 text-red-800';
@@ -740,7 +680,7 @@
                 return 'bg-white border-gray-200 text-gray-700'; 
             },
             formatDesc(desc) {
-                // 將「模擬考」加上粗體與底線強調
+                // 將「模擬考」加上粗體與底線強調 (移除背景色，讓科目本身的顏色能夠主導整個區塊)
                 let formatted = desc.replace(/(第[1-9]+次模擬考)/g, '<span class="font-black underline">$1</span>');
                 
                 // 科目名稱加粗
