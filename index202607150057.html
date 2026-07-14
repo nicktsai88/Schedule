@@ -185,13 +185,6 @@
                         </div>
                     </div>
 
-                    <!-- 1模倒數計時器 (高壓紅色螢光樣式) -->
-                    <div class="px-3 md:px-4 py-2 bg-red-50 border-b border-red-200 shrink-0 flex justify-center items-center">
-                        <div class="text-red-600 font-black text-sm md:text-base tracking-wider drop-shadow-md flex items-center shadow-[0_0_8px_rgba(239,68,68,0.4)] px-3 py-1 rounded border border-red-300 bg-white/50">
-                            🚨 1模倒數 <span class="text-red-700 text-lg md:text-xl mx-1.5">{{ day.countdownDays }}</span> 天 🔥
-                        </div>
-                    </div>
-
                     <!-- 固定每日任務區塊 (Card卡片預覽) -->
                     <div class="px-3 md:px-4 py-3 bg-indigo-50/50 border-b border-indigo-100 flex flex-col gap-2 shrink-0">
                         <div class="text-xs font-bold text-indigo-800 mb-1 flex items-center"><i class="fas fa-list-check mr-1.5"></i>每日固定複習</div>
@@ -254,13 +247,6 @@
                     <button @click="closeModal" class="print-hide text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
-                </div>
-
-                <!-- 1模倒數計時器 (Modal 列印時也會顯示) -->
-                <div class="px-6 py-3 bg-red-50 border-b border-red-200 shrink-0 flex justify-center items-center">
-                    <div class="text-red-600 font-black text-lg md:text-xl tracking-wider drop-shadow-md flex items-center shadow-[0_0_10px_rgba(239,68,68,0.4)] px-4 py-1.5 rounded-lg border-2 border-red-300 bg-white/70">
-                        🚨 距離第一階段模擬考 倒數 <span class="text-red-700 text-2xl md:text-3xl mx-2">{{ selectedDay.countdownDays }}</span> 天 ⏳🔥
-                    </div>
                 </div>
 
                 <!-- 固定每日任務區塊 (Modal列印時會出現在最上方) -->
@@ -412,7 +398,6 @@
         const schedule = [];
         let curr = new Date(2026, 5, 29); // 從 2026/06/29 開始
         const end = new Date(2026, 7, 30); // 到 2026/08/30 結束
-        const mockExamDate = new Date(2026, 7, 31); // 2026/08/31 目標：第一次模擬考
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -420,10 +405,6 @@
             const dateStr = `${curr.getMonth() + 1}/${String(curr.getDate()).padStart(2, '0')}`;
             const dayOfWeek = curr.getDay();
             const dayName = dayNames[dayOfWeek];
-
-            // 計算距離模擬考(8/31)的倒數天數
-            const diffTime = mockExamDate - curr;
-            const countdownDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             let events = [];
 
@@ -536,7 +517,7 @@
                 }
             }
 
-            schedule.push({ date: dateStr, day: dayName, events: events, countdownDays: countdownDays });
+            schedule.push({ date: dateStr, day: dayName, events: events });
             curr.setDate(curr.getDate() + 1);
         }
         return schedule;
