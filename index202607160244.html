@@ -99,20 +99,6 @@
             .print-hide, .print-hide * {
                 display: none !important;
             }
-            
-            /* 每週排程專屬列印區塊 */
-            .weekly-print-area, .weekly-print-area * {
-                visibility: visible;
-            }
-            .weekly-print-area {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-            }
-
             @page {
                 size: A4 portrait;
                 margin: 15mm;
@@ -123,54 +109,6 @@
 <body class="text-gray-800 antialiased">
 
 <div id="app" class="min-h-screen pb-12" v-cloak>
-    
-    <!-- 動態切換列印模式的 Page Size -->
-    <div v-html="dynamicPrintStyle"></div>
-
-    <!-- 專屬每週橫式列印區塊 (僅列印時顯示) -->
-    <div v-if="printMode === 'week' && selectedWeekForPrint" class="weekly-print-area bg-white text-black p-2 z-50">
-        <h2 class="text-2xl font-black text-center mb-3 flex items-center justify-center gap-3">
-            <i class="fas fa-calendar-week text-indigo-500"></i> 決戰會考 {{ selectedWeekForPrint.title }}
-        </h2>
-        
-        <div class="grid grid-cols-7 gap-1.5 border-t-2 border-l-2 border-gray-800">
-            <div v-for="day in selectedWeekForPrint.days" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col overflow-hidden h-[185mm]">
-                
-                <!-- Day Header -->
-                <div class="bg-gray-100 border-b-2 border-gray-800 py-1.5 text-center flex flex-col justify-center items-center shrink-0">
-                    <div class="font-bold text-base leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
-                </div>
-                
-                <!-- Countdown -->
-                <div class="bg-red-50 border-b border-red-200 py-1 text-center shrink-0">
-                    <div class="text-red-600 font-bold text-[10px] flex justify-center items-center gap-0.5">
-                        🚨 1模倒數 <span class="text-xs mx-0.5">{{ day.countdownDays }}</span> 天
-                    </div>
-                </div>
-                
-                <!-- Fixed Tasks -->
-                <div class="bg-indigo-50 border-b border-indigo-200 p-1 shrink-0">
-                    <div class="text-[9px] font-bold text-indigo-800 mb-0.5 border-b border-indigo-200 pb-0.5 text-center">每日固定複習</div>
-                    <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-1 text-[9px] text-gray-800 leading-tight mb-0.5">
-                        <div class="w-2 h-2 mt-0.5 border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                            <i v-if="task.completed" class="fas fa-check text-[6px]"></i>
-                        </div>
-                        <span class="break-words">{{ task.desc }}</span>
-                    </div>
-                </div>
-                
-                <!-- Events -->
-                <div class="p-1 flex flex-col gap-1 flex-grow overflow-hidden bg-white">
-                    <div v-for="event in day.events" :key="event.id" class="p-1 border border-gray-300 rounded flex flex-col gap-0.5" :class="event.completed ? 'opacity-50' : ''">
-                        <div class="text-[9px] font-mono font-bold text-gray-500">{{ event.time }}</div>
-                        <div class="text-[10px] font-bold text-gray-900 leading-snug break-words" v-html="formatDesc(event.desc)"></div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-    </div>
-
     <!-- Header (含登入功能) -->
     <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
         <div class="w-full px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -224,11 +162,6 @@
         <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-700 flex items-center border-b-4 border-indigo-200 pb-3">
                 <i class="fas fa-calendar-week mr-3 text-indigo-500"></i> {{ week.title }}
-                
-                <!-- 橫式列印本週按鈕 -->
-                <button @click="printWeek(week)" class="ml-auto print-hide bg-emerald-500 hover:bg-emerald-600 text-white text-sm md:text-base font-bold py-1.5 px-4 rounded-full shadow-md transition-all hover:scale-105 flex items-center gap-2 border border-emerald-400">
-                    <i class="fas fa-print"></i> 橫式列印本週
-                </button>
             </h2>
             
             <!-- 將網格設定為 4 欄，7天會自然分成 4天 + 3天 兩排 -->
@@ -646,9 +579,7 @@
                 currentUser: '',
                 isLoggedIn: false,
                 isLoggingIn: false,
-                historicalUsers: [],
-                printMode: 'none', 
-                selectedWeekForPrint: null
+                historicalUsers: [] 
             }
         },
         computed: {
@@ -671,29 +602,11 @@
                     d.dayOfWeek = d.day;
                 }));
                 return weeks;
-            },
-            dynamicPrintStyle() {
-                if (this.printMode === 'week') {
-                    return `<style>
-                        @media print { 
-                            @page { size: A4 landscape !important; margin: 8mm !important; } 
-                            .modal-overlay-print { display: none !important; }
-                        }
-                    <\/style>`;
-                }
-                return '';
             }
         },
         mounted() {
             this.initFirebase();
             this.scrollToToday();
-            
-            window.addEventListener('afterprint', () => {
-                if (this.printMode === 'week') {
-                    this.printMode = 'none';
-                    this.selectedWeekForPrint = null;
-                }
-            });
         },
         methods: {
             scrollToToday() {
@@ -844,24 +757,10 @@
             },
             closeModal() {
                 this.selectedDay = null;
-                this.printMode = 'none';
                 document.body.style.overflow = 'auto'; 
             },
             printModal() {
-                this.printMode = 'day';
-                this.$nextTick(() => {
-                    window.print();
-                });
-            },
-            printWeek(week) {
-                this.printMode = 'week';
-                this.selectedWeekForPrint = week;
-                this.$nextTick(() => {
-                    // 給予一點緩衝時間讓動態 <style> (轉向橫式) 徹底生效
-                    setTimeout(() => {
-                        window.print();
-                    }, 300);
-                });
+                window.print();
             },
             getFormattedDate(dateStr) {
                 const parts = dateStr.split('/');
