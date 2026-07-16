@@ -138,7 +138,7 @@
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased" :class="{'printing-week': printMode === 'week'}">
+<body class="text-gray-800 antialiased">
 
 <div id="app" class="min-h-screen pb-12" v-cloak>
     <!-- Header (含登入功能) -->
@@ -881,12 +881,14 @@
             printWeekly(week) {
                 this.printMode = 'week';
                 this.selectedWeekForPrint = week;
+                document.body.classList.add('printing-week'); // 手動添加列印專用樣式
                 this.$nextTick(() => {
                     window.print();
                     // 列印視窗關閉後恢復狀態
                     setTimeout(() => {
                         this.printMode = 'single';
                         this.selectedWeekForPrint = null;
+                        document.body.classList.remove('printing-week'); // 恢復正常樣式
                     }, 500);
                 });
             },
