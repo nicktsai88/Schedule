@@ -206,9 +206,9 @@
                     </div>
                     
                     <div class="p-1 flex flex-col gap-1 flex-grow overflow-hidden bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="p-1 border border-gray-300 rounded flex flex-col gap-0.5" :class="event.completed ? 'opacity-50' : ''">
-                            <div class="text-[9px] font-mono font-bold text-gray-500">{{ event.time }}</div>
-                            <div class="text-[10px] font-bold text-gray-900 leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                        <div v-for="event in day.events" :key="event.id" class="p-1 border rounded flex flex-col gap-0.5" :class="[getEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[9px] font-mono font-bold opacity-75">{{ event.time }}</div>
+                            <div class="text-[10px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -248,9 +248,9 @@
                     </div>
                     
                     <div class="p-1 flex flex-col gap-1 flex-grow overflow-hidden bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="p-1 border border-gray-300 rounded flex flex-col gap-0.5" :class="event.completed ? 'opacity-50' : ''">
-                            <div class="text-[9px] font-mono font-bold text-gray-500">{{ event.time }}</div>
-                            <div class="text-[10px] font-bold text-gray-900 leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                        <div v-for="event in day.events" :key="event.id" class="p-1 border rounded flex flex-col gap-0.5" :class="[getEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[9px] font-mono font-bold opacity-75">{{ event.time }}</div>
+                            <div class="text-[10px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
