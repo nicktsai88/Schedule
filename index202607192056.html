@@ -285,30 +285,30 @@
             <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(0, 3)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-1.5 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-lg leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[15px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 1模倒數 <span class="text-base mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-1.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[13px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-sm mx-0.5">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
-                        <div class="text-[14px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[14px] font-bold text-gray-800 leading-tight mb-1">
-                            <div class="w-4 h-4 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[11px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-2 py-1.5 shrink-0">
+                        <div class="text-[12px] font-black text-indigo-800 mb-1 border-b border-indigo-200 pb-0.5 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-1.5 text-[12px] font-bold text-gray-800 leading-tight mb-0.5">
+                            <div class="w-3.5 h-3.5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[10px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div class="text-[13px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[15px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-1.5 flex flex-col gap-1 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-1.5 py-1 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[11px] font-mono font-bold opacity-75 leading-none mb-0.5">{{ event.time }}</div>
+                            <div class="text-[13px] font-bold leading-tight break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -327,30 +327,30 @@
             <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(3, 6)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-1.5 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-lg leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[15px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 1模倒數 <span class="text-base mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-1.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[13px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-sm mx-0.5">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
-                        <div class="text-[14px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[14px] font-bold text-gray-800 leading-tight mb-1">
-                            <div class="w-4 h-4 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[11px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-2 py-1.5 shrink-0">
+                        <div class="text-[12px] font-black text-indigo-800 mb-1 border-b border-indigo-200 pb-0.5 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-1.5 text-[12px] font-bold text-gray-800 leading-tight mb-0.5">
+                            <div class="w-3.5 h-3.5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[10px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div class="text-[13px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[15px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-1.5 flex flex-col gap-1 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-1.5 py-1 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[11px] font-mono font-bold opacity-75 leading-none mb-0.5">{{ event.time }}</div>
+                            <div class="text-[13px] font-bold leading-tight break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -369,30 +369,30 @@
             <div class="grid grid-cols-1 max-w-md mx-auto gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(6, 7)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-1.5 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-lg leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[15px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 1模倒數 <span class="text-base mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-1.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[13px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-sm mx-0.5">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
-                        <div class="text-[14px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[14px] font-bold text-gray-800 leading-tight mb-1">
-                            <div class="w-4 h-4 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[11px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-2 py-1.5 shrink-0">
+                        <div class="text-[12px] font-black text-indigo-800 mb-1 border-b border-indigo-200 pb-0.5 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-1.5 text-[12px] font-bold text-gray-800 leading-tight mb-0.5">
+                            <div class="w-3.5 h-3.5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[10px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div class="text-[13px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[15px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-1.5 flex flex-col gap-1 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-1.5 py-1 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[11px] font-mono font-bold opacity-75 leading-none mb-0.5">{{ event.time }}</div>
+                            <div class="text-[13px] font-bold leading-tight break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
