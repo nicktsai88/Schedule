@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 決戰會考 2模衝刺計畫</title>
+    <title>🏆 決戰會考 國二升國三暑假衝刺計畫</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -141,22 +141,14 @@
 <body class="text-gray-800 antialiased">
 
 <div id="app" class="min-h-screen pb-12" v-cloak>
-    
-    <!-- 提示訊息 Toast -->
-    <transition name="modal">
-        <div v-if="toastMessage" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 font-bold text-sm tracking-wide border border-gray-600">
-            <span>{{ toastMessage }}</span>
-        </div>
-    </transition>
-
     <!-- Header (含登入功能) -->
     <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
         <div class="w-full px-4 md:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-black tracking-wider flex items-center">
-                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>決戰會考 2模衝刺計畫
+                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>決戰會考 暑假衝刺計畫
                 </h1>
-                <p class="text-blue-100 text-sm mt-1">執行期間：9/21 ～ 1/17 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
+                <p class="text-blue-100 text-sm mt-1">執行期間：6/29 ～ 8/30 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
             </div>
             
             <!-- 使用者登入區塊 -->
@@ -196,6 +188,7 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="w-full px-3 md:px-5 lg:px-8 py-6">
         <!-- Weeks Grid -->
         <div v-for="(week, weekIndex) in groupedSchedule" :key="weekIndex" class="mb-10">
@@ -215,25 +208,18 @@
                      @click="openModal(day)"
                      class="bg-white rounded-2xl shadow-md border-t-8 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col h-full relative"
                      :class="[
-                         getDayBorderColor(day.dayOfWeek, day.isExamWeek), 
-                         isToday(day.fullDate) ? 'glow-today ring-4 ring-yellow-400' : '',
-                         isPast(day.fullDate) && !isToday(day.fullDate) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
+                         getDayBorderColor(day.dayOfWeek, day.date), 
+                         isToday(day.date) ? 'glow-today ring-4 ring-yellow-400' : '',
+                         isPast(day.date) && !isToday(day.date) ? 'grayscale opacity-50 hover:grayscale-0 hover:opacity-100 bg-gray-100' : ''
                      ]">
                     
                     <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center shrink-0">
                         <div class="font-black text-gray-800 text-2xl md:text-3xl flex items-center tracking-wide">
                             {{ day.date }} <span class="text-lg md:text-xl text-gray-500 ml-2 mr-3">({{ day.dayOfWeek }})</span>
-                            <span v-if="isToday(day.fullDate)" class="text-sm md:text-base bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full animate-pulse">今日</span>
+                            <span v-if="isToday(day.date)" class="text-sm md:text-base bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full animate-pulse">今日</span>
                         </div>
-                        <div v-if="day.isExamWeek" class="text-sm md:text-base font-bold bg-pink-100 text-pink-700 px-3 py-1 rounded-full shadow-sm">
-                            暫停進度
-                        </div>
-                    </div>
-
-                    <!-- 倒數計時區塊 -->
-                    <div v-if="day.countdownName" class="bg-red-50 border-b-2 border-red-200 px-4 py-2 shrink-0 shadow-[inset_0_0_10px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-center text-sm md:text-base flex justify-center items-center gap-1.5 drop-shadow-sm">
-                            🚨 {{ day.countdownName }}倒數 <span class="text-xl mx-1 bg-white px-2 py-0.5 rounded shadow-sm border border-red-200">{{ day.countdownDays }}</span> 天 🔥
+                        <div v-if="day.isHoliday" class="text-sm md:text-base font-bold bg-pink-100 text-pink-700 px-3 py-1 rounded-full shadow-sm">
+                            旅遊/假日
                         </div>
                     </div>
 
@@ -255,7 +241,13 @@
                         </div>
                     </div>
 
-                    <!-- 每日主科排程 -->
+                    <!-- 倒數計時區塊 -->
+                    <div class="bg-red-50 border-b-2 border-red-200 px-4 py-2 shrink-0 shadow-[inset_0_0_10px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-center text-sm md:text-base flex justify-center items-center gap-1.5 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-xl mx-1 bg-white px-2 py-0.5 rounded shadow-sm border border-red-200">{{ day.countdownDays }}</span> 天 🔥
+                        </div>
+                    </div>
+
                     <div class="p-3 md:p-4 space-y-3 flex-grow overflow-y-auto max-h-[450px] hide-scrollbar">
                         <div v-for="(event, eIndex) in day.events" :key="event.id" 
                              @click.stop="toggleTask(event)"
@@ -263,14 +255,14 @@
                              :class="[getEventStyle(event.desc), event.completed ? 'task-completed' : '']">
                             
                             <div class="pt-1 mr-3">
-                                <div class="w-6 h-6 md:w-7 md:h-7 rounded border-2 flex items-center justify-center transition-colors duration-200 shrink-0"
+                                <div class="w-6 h-6 md:w-7 md:h-7 rounded border-2 flex items-center justify-center transition-colors duration-200"
                                      :class="event.completed ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-300'">
                                      <i v-if="event.completed" class="fas fa-check text-white text-sm md:text-base"></i>
                                 </div>
                             </div>
 
                             <div class="flex-grow flex flex-col select-none">
-                                <div v-if="event.time !== '今日進度'" class="font-mono text-sm md:text-base font-semibold opacity-75 mb-1.5 flex items-center">
+                                <div class="font-mono text-sm md:text-base font-semibold opacity-75 mb-1.5 flex items-center">
                                     <i class="far fa-clock mr-1.5"></i> {{ event.time }}
                                 </div>
                                 <div class="text-base md:text-xl font-bold leading-relaxed tracking-wide" v-html="formatDesc(event.desc)"></div>
@@ -282,42 +274,41 @@
         </div>
     </main>
 
-    <!-- 專屬每週橫式列印區塊 (僅列印時顯示) 3頁版本 -->
+    <!-- 專屬每週橫式列印區塊 (僅列印時顯示) -->
     <div v-if="printMode === 'week' && selectedWeekForPrint" class="weekly-print-area bg-white text-black z-50">
-        
         <!-- 第一頁：星期一到星期三 -->
         <div class="print-page w-full box-border pt-1 px-2 h-full">
             <h2 class="text-3xl font-black text-center mb-1 flex items-center justify-center gap-3">
-                <i class="fas fa-calendar-week text-indigo-500"></i> {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期一 ~ 星期三)</span>
+                <i class="fas fa-calendar-week text-indigo-500"></i> 決戰會考 {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期一 ~ 星期三)</span>
             </h2>
             
-            <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800 h-full">
+            <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(0, 3)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-3 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-3xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-2xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div v-if="day.countdownName" class="bg-red-50 border-b-2 border-red-200 py-2.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[18px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 {{ day.countdownName }}倒數 <span class="text-[22px] mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[17px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-[20px] mx-1">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-4 py-3 shrink-0">
-                        <div class="text-[17px] font-black text-indigo-800 mb-2 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2.5 text-[17px] font-bold text-gray-800 leading-tight mb-1.5">
-                            <div class="w-6 h-6 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[14px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
+                        <div class="text-[16px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[16px] font-bold text-gray-800 leading-tight mb-1">
+                            <div class="w-5 h-5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[13px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-3 flex flex-col gap-3 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2.5 py-3 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div v-if="event.time !== '今日進度'" class="text-[16px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[20px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[15px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
+                            <div class="text-[18px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -330,36 +321,36 @@
         <!-- 第二頁：星期四到星期六 -->
         <div class="print-page w-full box-border pt-1 px-2 h-full">
             <h2 class="text-3xl font-black text-center mb-1 flex items-center justify-center gap-3">
-                <i class="fas fa-calendar-week text-indigo-500"></i> {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期四 ~ 星期六)</span>
+                <i class="fas fa-calendar-week text-indigo-500"></i> 決戰會考 {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期四 ~ 星期六)</span>
             </h2>
             
-            <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800 h-full">
+            <div class="grid grid-cols-3 gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(3, 6)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-3 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-3xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-2xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div v-if="day.countdownName" class="bg-red-50 border-b-2 border-red-200 py-2.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[18px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 {{ day.countdownName }}倒數 <span class="text-[22px] mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[17px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-[20px] mx-1">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-4 py-3 shrink-0">
-                        <div class="text-[17px] font-black text-indigo-800 mb-2 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2.5 text-[17px] font-bold text-gray-800 leading-tight mb-1.5">
-                            <div class="w-6 h-6 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[14px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
+                        <div class="text-[16px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[16px] font-bold text-gray-800 leading-tight mb-1">
+                            <div class="w-5 h-5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[13px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-3 flex flex-col gap-3 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2.5 py-3 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div v-if="event.time !== '今日進度'" class="text-[16px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[20px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[15px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
+                            <div class="text-[18px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -372,36 +363,36 @@
         <!-- 第三頁：星期日 -->
         <div class="print-page w-full box-border pt-1 px-2 h-full">
             <h2 class="text-3xl font-black text-center mb-1 flex items-center justify-center gap-3">
-                <i class="fas fa-calendar-week text-indigo-500"></i> {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期日)</span>
+                <i class="fas fa-calendar-week text-indigo-500"></i> 決戰會考 {{ selectedWeekForPrint.title }} <span class="text-xl font-bold text-gray-600">(星期日)</span>
             </h2>
             
-            <div class="grid grid-cols-1 max-w-md mx-auto gap-0 border-t-2 border-l-2 border-gray-800 h-full">
+            <div class="grid grid-cols-1 max-w-md mx-auto gap-0 border-t-2 border-l-2 border-gray-800">
                 <div v-for="day in selectedWeekForPrint.days.slice(6, 7)" :key="day.date" class="border-b-2 border-r-2 border-gray-800 flex flex-col h-full">
                     
-                    <div class="bg-gray-100 border-b-2 border-gray-800 py-3 text-center flex flex-col justify-center items-center shrink-0">
-                        <div class="font-bold text-3xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
+                    <div class="bg-gray-100 border-b-2 border-gray-800 py-2 text-center flex flex-col justify-center items-center shrink-0">
+                        <div class="font-bold text-2xl leading-tight">{{ day.date }} ({{ day.dayOfWeek }})</div>
                     </div>
                     
-                    <div v-if="day.countdownName" class="bg-red-50 border-b-2 border-red-200 py-2.5 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
-                        <div class="text-red-600 font-black text-[18px] flex justify-center items-center gap-1 drop-shadow-sm">
-                            🚨 {{ day.countdownName }}倒數 <span class="text-[22px] mx-1">{{ day.countdownDays }}</span> 天
+                    <div class="bg-red-50 border-b-2 border-red-200 py-2 text-center shrink-0 shadow-[inset_0_0_8px_rgba(254,226,226,1)]">
+                        <div class="text-red-600 font-black text-[17px] flex justify-center items-center gap-1 drop-shadow-sm">
+                            🚨 1模倒數 <span class="text-[20px] mx-1">{{ day.countdownDays }}</span> 天
                         </div>
                     </div>
                     
-                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-4 py-3 shrink-0">
-                        <div class="text-[17px] font-black text-indigo-800 mb-2 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
-                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2.5 text-[17px] font-bold text-gray-800 leading-tight mb-1.5">
-                            <div class="w-6 h-6 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
-                                <i v-if="task.completed" class="fas fa-check text-[14px]"></i>
+                    <div class="bg-indigo-50 border-b-2 border-indigo-200 px-3 py-2 shrink-0">
+                        <div class="text-[16px] font-black text-indigo-800 mb-1.5 border-b border-indigo-200 pb-1 text-center leading-none">每日固定複習</div>
+                        <div v-for="task in day.fixedTasks" :key="task.id" class="flex items-start gap-2 text-[16px] font-bold text-gray-800 leading-tight mb-1">
+                            <div class="w-5 h-5 mt-[1px] border border-gray-500 rounded-sm shrink-0 flex items-center justify-center" :class="task.completed ? 'bg-gray-600 text-white' : 'bg-white'">
+                                <i v-if="task.completed" class="fas fa-check text-[13px]"></i>
                             </div>
                             <span class="break-words">{{ task.desc }}</span>
                         </div>
                     </div>
                     
-                    <div class="p-3 flex flex-col gap-3 flex-grow bg-white">
-                        <div v-for="event in day.events" :key="event.id" class="px-2.5 py-3 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
-                            <div v-if="event.time !== '今日進度'" class="text-[16px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
-                            <div class="text-[20px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
+                    <div class="p-2 flex flex-col gap-2 flex-grow bg-white">
+                        <div v-for="event in day.events" :key="event.id" class="px-2 py-2 border rounded flex flex-col" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="text-[15px] font-mono font-bold opacity-75 leading-none mb-1">{{ event.time }}</div>
+                            <div class="text-[18px] font-bold leading-snug break-words" v-html="formatDesc(event.desc)"></div>
                         </div>
                     </div>
                     
@@ -419,8 +410,8 @@
                     <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                         <i class="fas fa-calendar-day mr-3 opacity-70"></i>
                         {{ selectedDay.date }} ({{ selectedDay.dayOfWeek }}) 詳細進度
-                        <span v-if="selectedDay.isExamWeek" class="ml-3 text-sm font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full print-hide">暫停進度</span>
-                        <span v-if="isToday(selectedDay.fullDate)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full print-hide">✨ 就是今天</span>
+                        <span v-if="selectedDay.isHoliday" class="ml-3 text-sm font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded-full">旅遊/假日</span>
+                        <span v-if="isToday(selectedDay.date)" class="ml-3 text-sm font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full print-hide">✨ 就是今天</span>
                     </h3>
                     <button @click="closeModal" class="print-hide text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-white/50 transition-colors">
                         <i class="fas fa-times text-xl"></i>
@@ -430,9 +421,9 @@
                 <div class="p-6 overflow-y-auto flex-grow bg-gray-50 space-y-4">
                     
                     <!-- 倒數計時區塊 (Modal 內) -->
-                    <div v-if="selectedDay.countdownName" class="bg-red-50 border-2 border-red-200 px-4 py-3 rounded-xl shadow-[inset_0_0_10px_rgba(254,226,226,1)] mb-4">
+                    <div class="bg-red-50 border-2 border-red-200 px-4 py-3 rounded-xl shadow-[inset_0_0_10px_rgba(254,226,226,1)] mb-4">
                         <div class="text-red-600 font-black text-center text-lg md:text-xl flex justify-center items-center gap-2 drop-shadow-sm">
-                            🚨 {{ selectedDay.countdownName }}倒數 <span class="text-2xl mx-1 bg-white px-3 py-0.5 rounded shadow-sm border border-red-200">{{ selectedDay.countdownDays }}</span> 天 🔥
+                            🚨 1模倒數 <span class="text-2xl mx-1 bg-white px-3 py-0.5 rounded shadow-sm border border-red-200">{{ selectedDay.countdownDays }}</span> 天 🔥
                         </div>
                     </div>
 
@@ -467,7 +458,7 @@
                         </div>
 
                         <div class="flex flex-col justify-center">
-                            <div v-if="event.time !== '今日進度'" class="font-mono text-sm font-bold opacity-75 text-gray-600 mb-1 flex items-center">
+                            <div class="font-mono text-sm font-bold opacity-75 text-gray-600 mb-1 flex items-center">
                                 <i class="far fa-clock text-indigo-400 mr-2"></i> {{ event.time }}
                             </div>
                             <div class="text-lg font-bold leading-relaxed" v-html="formatDesc(event.desc)"></div>
@@ -508,145 +499,265 @@
     let globalAppId = 'default-app-id';
     let currentUserDocUnsubscribe = null;
 
+    const GLOBAL_HOLIDAYS = ["7/01", "7/02", "7/15", "8/05", "8/22", "8/23", "8/24"];
     const FIXED_TASKS = ["國文會考題組5篇", "英文會考題組5篇", "國文成語學習", "英文單字學習", "文言文3篇"];
 
-    // 透過閉包自動化生成 2026/9/21 ~ 2027/1/17 的所有課表
+    const calculateCountdown = (dateStr) => {
+        const parts = dateStr.split('/');
+        const currentYear = 2026;
+        const currentMonth = parseInt(parts[0]) - 1;
+        const currentDay = parseInt(parts[1]);
+        const currentDate = new Date(currentYear, currentMonth, currentDay);
+        
+        const targetDate = new Date(2026, 7, 31); // 2026/08/31
+        
+        const diffTime = targetDate - currentDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 0;
+    };
+
     const rawScheduleText = (() => {
-        const chiTopics = [
-            "國文(大滿貫) 第3冊 單元7 (1~3課)", "國文(大滿貫) 第3冊 單元8 (4~6課)",
-            "國文(大滿貫) 第3冊 單元9 (7~10課)", "國文(大滿貫) 第4冊 單元10 (1~3課)",
-            "國文(大滿貫) 第4冊 單元11 (4~6課)", "國文(大滿貫) 第4冊 單元12 (7~10課)",
-            "國文會考模擬試題 1~4冊"
-        ];
-        
-        const engTopics = [
-            "英文(大滿貫) 第3冊 單元6 (1~2課)", "英文(大滿貫) 第3冊 單元7 (3~4課)",
-            "英文(大滿貫) 第3冊 單元8 (5~6課)", "英文會考模擬試題 (1~3冊複習)",
-            "英文(大滿貫) 第4冊 單元9 (1~2課)", "英文(大滿貫) 第4冊 單元10 (3~4課)",
-            "英文(大滿貫) 第4冊 單元11 (5~6課)", "英文會考模擬試題 (1~4冊複習)"
-        ];
-        
+        // 重整後的最新進度陣列 (過濾掉[已完成]項目，保留需銜接的部分)
         const mathTopics = [
-            "數學(大滿貫) 第4冊 單元15 (三角形的基本性質)", "數學(大滿貫) 第4冊 單元16 (平行與四邊形)",
-            "數學(大滿貫) 第4冊 單元13 (數列與級數)", "數學(大滿貫) 第4冊 單元14 (線型函數)",
-            "數學(大滿貫) 第3冊 單元10 (乘法公式與多項式)", "數學(大滿貫) 第3冊 單元11 (平方根與畢氏定理)",
-            "數學(大滿貫) 第3冊 單元12 (因式分解與一元二次方程式)"
+            "數學 會考模擬試題 1~2冊", 
+            "數學 單元10 第三冊 (乘法公式與多項式)", 
+            "數學 單元11 第三冊 (平方根與畢氏定理)", 
+            "數學 單元12 第三冊 (因式分解與一元二次方程式)", 
+            "數學 單元13 第四冊 (數列與級數)", 
+            "數學 單元14 第四冊 (線型函數)", 
+            "數學 單元15 第四冊 (三角形的基本性質)", 
+            "數學 單元16 第四冊 (平行與四邊形)", 
+            "數學 會考模擬試題 1~4冊"
         ];
         
-        const bioTopics = [
-            "生物(大滿貫) 第2冊 單元6 (生殖)", "生物(大滿貫) 第2冊 單元7 (遺傳)",
-            "生物(大滿貫) 第2冊 單元8 (演化與分類)", "生物(大滿貫) 第2冊 單元9 (生態系與環境保護)"
+        // 生物與理化剩餘進度
+        const sciTopics = [
+            "生物 單元9 第二冊 (生物與環境)", 
+            "理化 單元5 第三冊 (溫度與熱)", 
+            "理化 單元6 第三冊 (原子與分子的反應世界)", 
+            "理化 單元7 第四冊 (化學計量/化學反應/氧化還原)", 
+            "理化 單元8 第四冊 (酸鹼鹽)", 
+            "理化 單元9 第四冊 (反應速率與反應平衡)", 
+            "理化 單元10 第四冊 (有機化合物)", 
+            "理化 單元11 第四冊 (力與壓力)", 
+            "理化 會考模擬試題 3~4冊"
         ];
         
-        const chemTopics = [
-            "理化(大滿貫) 第4冊 單元7 (化學劑量/化學反應/氧化還原)", "理化(大滿貫) 第4冊 單元8 (酸鹼鹽)",
-            "理化(大滿貫) 第4冊 單元9 (反應速率與平衡)", "理化(大滿貫) 第4冊 單元10 (有機化合物)",
-            "理化(大滿貫) 第4冊 單元11 (力與壓力)"
+        // 英文剩餘單元及文法
+        const engTopics = [
+            "英文 單元10 第四冊 (3~4課)", 
+            "英文 單元11 第四冊 (5~6課)", 
+            "英文 會考模擬試題 1~4冊", 
+            "英文 文法總匯: 第3章 (時態:未來簡單式與現在/過去完成式)", 
+            "英文 文法總匯: 第4章 (助動詞)", 
+            "英文 文法總匯: 第5章 (介系詞)", 
+            "英文 文法總匯: 第6章 (名詞與代名詞)", 
+            "英文 文法總匯: 第7章 (形容詞)", 
+            "英文 文法總匯: 第8章 (副詞)", 
+            "英文 文法總匯: 第9章 (形容詞與副詞的級)", 
+            "英文 文法總匯: 第10章 (動名詞與不定詞)", 
+            "英文 文法總匯: 第11章 (情緒動詞與情緒形容詞)", 
+            "英文 文法總匯: 第12章 (被動語態)", 
+            "英文 文法總匯: 第13章 (特殊動詞(一))", 
+            "英文 文法總匯: 第14章 (特殊動詞(二))", 
+            "英文 文法總匯: 第15章 (倒裝句型)", 
+            "英文 文法總匯: 第16章 (疑問詞)", 
+            "英文 文法總匯: 第17章 (連接詞)", 
+            "英文 文法總匯: 第18章 (關係代名詞)", 
+            "英文 文法總匯: 第19章 (其他重要句型文法)", 
+            "英文 文法總匯: 第20章 (假設語氣)"
         ];
         
-        // 生物與理化混合陣列 (交替出現)
-        const sciTopics = [];
-        const maxSciLen = Math.max(bioTopics.length, chemTopics.length);
-        for(let i=0; i<maxSciLen; i++) {
-            if(bioTopics[i]) sciTopics.push(bioTopics[i]);
-            if(chemTopics[i]) sciTopics.push(chemTopics[i]);
-        }
+        // 社會科(歷史、地理、公民) 交叉複習剩餘進度
+        const socTopics = [
+            "歷史 會考模擬試題 1~2冊", 
+            "地理 單元5 第二冊 臺灣的產業", 
+            "公民 單元4 第二冊 公共意見、公平正義與社會福利", 
+            "歷史 單元5 第三冊 (商周至隋唐時期)", 
+            "地理 單元6 第二冊 臺灣的聚落、交通與區域發展", 
+            "地理 會考模擬試題 1~2冊", 
+            "公民 會考模擬試題 1~2冊", 
+            "歷史 單元6 第三冊 (宋元與明清時期)", 
+            "地理 單元7 第三冊 中國的自然環境與人口", 
+            "公民 單元5 第三冊 國家、憲法與基本權利", 
+            "歷史 單元7 第三冊 (西力衝擊下的晚清與東亞)", 
+            "地理 單元8 第三冊 中國的產業、經濟發展與全球關聯", 
+            "公民 單元6 第三冊 法治與權力分立、中央政府", 
+            "歷史 單元8 第四冊 (中華民國的建立與社會變遷)", 
+            "地理 單元9 第三冊 全球氣候概述、東北亞", 
+            "公民 單元7 第三冊 地方政府與政治參與", 
+            "歷史 單元9 第四冊 (現代國家的挑戰與變局)", 
+            "地理 單元10 第四冊 東南亞與南亞", 
+            "公民 單元8 第四冊 民法、刑法與行政法", 
+            "歷史 單元10 第四冊 (共黨政權在中國與當代東亞的局勢)", 
+            "地理 單元11 第四冊 西亞與北非", 
+            "公民 單元9 第四冊 權利救濟", 
+            "歷史 會考模擬試題 1~4冊", 
+            "地理 單元12 第四冊 漠南非洲", 
+            "公民 單元10 第四冊 青少年法律", 
+            "地理 會考模擬試題 1~4冊", 
+            "公民 會考模擬試題 1~4冊"
+        ];
 
-        const hisTopics = [
-            "歷史(大滿貫) 第3冊 單元5 (商周至隋唐時期)", "歷史(大滿貫) 第3冊 單元6 (宋元與明清時期)",
-            "歷史(大滿貫) 第3冊 單元7 (西力衝擊下的晚清與東亞)", "歷史(大滿貫) 第4冊 單元8 (中華民國的建立與社會變遷)",
-            "歷史(大滿貫) 第4冊 單元9 (現代國家的挑戰與變局)", "歷史(大滿貫) 第4冊 單元10 (共黨政權在中國與當代東亞的局勢)"
-        ];
-        
-        const geoTopics = [
-            "地理(KO) 第3冊 單元7 中國的自然環境與人口", "地理(KO) 第3冊 單元8 中國的產業、經濟發展與全球關聯",
-            "地理(KO) 第3冊 單元9 全球氣候概述、東北亞", "地理(KO) 第4冊 單元10 東南亞與南亞",
-            "地理(KO) 第4冊 單元11 西亞與北非", "地理(KO) 第4冊 單元12 漠南非洲"
-        ];
-        
-        const civTopics = [
-            "公民(大滿貫) 第3冊 單元5 國家、憲法與基本權利", "公民(大滿貫) 第3冊 單元6 法治與權力分立、中央政府",
-            "公民(大滿貫) 第3冊 單元7 地方政府與政治參與", "公民(大滿貫) 第4冊 單元8 民法、刑法與行政法",
-            "公民(大滿貫) 第4冊 單元9 權利救濟", "公民(大滿貫) 第4冊 單元10 青少年法律"
+        // 國文剩餘進度
+        const chiTopics = [
+            "國文 單元12 第四冊 (主題專區 含語文常識)", 
+            "國文 會考模擬試題 1~4冊"
         ];
 
-        let cI = 0, eI = 0, mI = 0, sI = 0, hI = 0, gI = 0, civI = 0;
+        // 因為陣列已經剔除完成的項目，全部重置從 0 開始
+        let mI = 0, sI = 0, eI = 0, socI = 0, cI = 0, cM = 1;
 
         const schedule = [];
-        let curr = new Date(2026, 8, 21); // 2026/09/21
-        const end = new Date(2027, 0, 17); // 2027/01/17
+        let curr = new Date(2026, 5, 29); // 2026/06/29 開始
+        const end = new Date(2026, 7, 30); // 2026/08/30 結束
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
-        // 定義防撞考試週
-        const exam1Start = new Date(2026, 9, 12); // 10/12
-        const exam1End = new Date(2026, 9, 18);   // 10/18
-        const exam2Start = new Date(2026, 10, 23); // 11/23
-        const exam2End = new Date(2026, 10, 29);   // 11/29
-        const mock2Start = new Date(2026, 11, 21); // 12/21
-        const mock2End = new Date(2026, 11, 27);   // 12/27
-
-        // 目標倒數日
-        const target1 = new Date(2026, 9, 15); // 1段 10/15
-        const target2 = new Date(2026, 10, 26); // 2段 11/26
-        const targetMock2 = new Date(2026, 11, 23); // 2模 12/23
-
         while (curr <= end) {
             const dateStr = `${curr.getMonth() + 1}/${String(curr.getDate()).padStart(2, '0')}`;
-            const fullDateStr = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
             const dayOfWeek = curr.getDay();
             const dayName = dayNames[dayOfWeek];
 
             let events = [];
-            let isExamWeek = false;
-
-            // 判斷是否為暫停進度的考試週
-            if (curr >= exam1Start && curr <= exam1End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "📝 1段 考試週 (暫停進度)" });
-            } else if (curr >= exam2Start && curr <= exam2End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "📝 2段 考試週 (暫停進度)" });
-            } else if (curr >= mock2Start && curr <= mock2End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "🎯 2模 考試週 (暫停進度)" });
-            } else {
-                // 正常推進度 (星期一(英文)/星期二(自然)/星期三(國文)/星期四(數學)/星期五(地理)/星期六(歷史)/星期日(公民))
-                let desc = "彈性時間";
-                if (dayOfWeek === 1) desc = eI < engTopics.length ? engTopics[eI++] : "英文 (進度已達標，自由複習)";
-                else if (dayOfWeek === 2) desc = sI < sciTopics.length ? sciTopics[sI++] : "自然 (進度已達標，自由複習)";
-                else if (dayOfWeek === 3) desc = cI < chiTopics.length ? chiTopics[cI++] : "國文 (進度已達標，自由複習)";
-                else if (dayOfWeek === 4) desc = mI < mathTopics.length ? mathTopics[mI++] : "數學 (進度已達標，自由複習)";
-                else if (dayOfWeek === 5) desc = gI < geoTopics.length ? geoTopics[gI++] : "地理 (進度已達標，自由複習)";
-                else if (dayOfWeek === 6) desc = hI < hisTopics.length ? hisTopics[hI++] : "歷史 (進度已達標，自由複習)";
-                else if (dayOfWeek === 0) desc = civI < civTopics.length ? civTopics[civI++] : "公民 (進度已達標，自由複習)";
-
-                events.push({ time: "今日進度", desc: desc });
-            }
-
-            // 計算最近的倒數計時
-            let cdName = "";
-            let cdDays = 0;
-            const diffDays = (target) => Math.ceil((target - curr) / (1000 * 60 * 60 * 24));
             
-            if (diffDays(target1) >= 0) {
-                cdName = "1段"; cdDays = diffDays(target1);
-            } else if (diffDays(target2) >= 0) {
-                cdName = "2段"; cdDays = diffDays(target2);
-            } else if (diffDays(targetMock2) >= 0) {
-                cdName = "2模"; cdDays = diffDays(targetMock2);
+            // 變更點：根據要求 7/27 起開始推進新進度
+            const advanceProgress = curr >= new Date(2026, 6, 27); // 7/27 開始
+            const isBeforeJuly27 = curr < new Date(2026, 6, 27) && curr >= new Date(2026, 5, 29);
+            
+            const isFinalExam = (dateStr === "6/29");
+            const isTaichung = (dateStr === "7/01" || dateStr === "7/02");
+            const isFamilyTrip1 = (dateStr === "7/15");
+            const isFamilyTrip2 = (dateStr === "8/05");
+            const isPenghu = (dateStr === "8/22" || dateStr === "8/23" || dateStr === "8/24");
+            const isJuly24 = (dateStr === "7/24");
+
+            if (isFinalExam) {
+                events.push({ time: "全天", desc: "📝 學校期末考 (暫停進度)" });
+            } else if (isTaichung) {
+                events.push({ time: "全天", desc: "🚗 台中之旅 (暫停進度)" });
+            } else if (isPenghu) {
+                events.push({ time: "全天", desc: "🏖️ 澎湖之旅 (暫停進度)" });
+            } else if (isFamilyTrip1 || isFamilyTrip2) {
+                events.push({ time: "全天", desc: "🚗 家庭旅遊日 (暫停進度)" });
+            } else if (isJuly24 && dayOfWeek === 5) {
+                // 變更點：7/24 (五) 專屬課表更新
+                events.push({ time: "07:00-07:30", desc: "早餐" });
+                events.push({ time: "07:30-08:00", desc: "國文/英文閱讀練習" });
+                events.push({ time: "08:00-10:00", desc: "數學彈性時間" });
+                events.push({ time: "10:00-12:00", desc: "國文彈性時間" });
+                events.push({ time: "12:00-13:00", desc: "中餐+午睡" });
+                events.push({ time: "13:00-15:00", desc: "生物/理化彈性時間" });
+                events.push({ time: "15:00-16:30", desc: "英文彈性時間" });
+                events.push({ time: "16:30-18:00", desc: "運動+洗澡+晚餐" });
+                events.push({ time: "18:00-20:00", desc: "數學家教" });
+                events.push({ time: "20:00-22:00", desc: "鍾揚理化複習" }); // 依要求更新
+                events.push({ time: "22:00-23:00", desc: "Jin英文複習" });  // 依要求更新
             } else {
-                cdName = "會考"; cdDays = diffDays(new Date(2027, 4, 15)); // 會考備用
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon - Fri
+                    events.push({ time: "07:00-07:30", desc: "早餐" });
+                    events.push({ time: "07:30-08:00", desc: "國文/英文閱讀練習" });
+
+                    if (dayOfWeek === 5) { // 常規星期五
+                        events.push({ time: "08:00-10:00", desc: "數學彈性時間" });
+                        events.push({ time: "10:00-12:00", desc: "國文彈性時間" });
+                        events.push({ time: "12:00-13:00", desc: "中餐+午睡" });
+                        events.push({ time: "13:00-15:00", desc: "生物/理化彈性時間" });
+                        events.push({ time: "15:00-16:30", desc: "英文彈性時間" });
+                        events.push({ time: "16:30-18:00", desc: "運動+洗澡+晚餐" });
+                        events.push({ time: "18:00-20:00", desc: "數學家教" });
+                        
+                        let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                        let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                        events.push({ time: "20:00-21:30", desc: socDesc1 });
+                        events.push({ time: "21:30-23:00", desc: socDesc2 });
+                    } else { // 星期一 到 星期四
+                        let mathDesc;
+                        if (isBeforeJuly27) {
+                            mathDesc = "✅ 數學 (7/27前進度已達標)";
+                        } else {
+                            mathDesc = advanceProgress && mI < mathTopics.length ? mathTopics[mI++] : `數學 (彈性複習)`;
+                        }
+                        events.push({ time: "08:00-10:00", desc: mathDesc });
+
+                        if (dayOfWeek === 3) {
+                            events.push({ time: "10:00-12:00", desc: "理化家教" });
+                        } else {
+                            let chiDesc;
+                            if (isBeforeJuly27) {
+                                chiDesc = "✅ 國文 (7/27前進度已達標)";
+                            } else if (curr <= new Date(2026, 7, 10)) {
+                                chiDesc = advanceProgress && cI < chiTopics.length ? chiTopics[cI++] : "國文 (彈性複習)";
+                            } else {
+                                chiDesc = `國文科 第${cM++}次模擬考`;
+                            }
+                            events.push({ time: "10:00-12:00", desc: chiDesc });
+                        }
+
+                        events.push({ time: "12:00-13:00", desc: "中餐+午睡" });
+
+                        let sciDesc = advanceProgress && sI < sciTopics.length ? sciTopics[sI++] : (isBeforeJuly27 ? "✅ 自然 (7/27前進度已達標)" : `自然 (彈性複習)`);
+                        events.push({ time: "13:00-15:00", desc: sciDesc });
+
+                        let engDesc = advanceProgress && eI < engTopics.length ? engTopics[eI++] : (isBeforeJuly27 ? "✅ 英文 (7/27前進度已達標)" : `英文 (彈性複習)`);
+                        events.push({ time: "15:00-16:30", desc: engDesc });
+
+                        events.push({ time: "16:30-18:00", desc: "運動+洗澡+晚餐" });
+
+                        if (dayOfWeek === 1) { // Mon
+                            events.push({ time: "18:00-19:30", desc: "複習鍾揚理化上課內容" });
+                            events.push({ time: "19:30-22:00", desc: "數學家教" });
+                            events.push({ time: "22:00-23:00", desc: "國文寫作練習" });
+                        } else if (dayOfWeek === 2) { // Tue
+                            let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            let socDesc3 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            events.push({ time: "18:00-19:30", desc: socDesc1 });
+                            events.push({ time: "19:30-21:00", desc: socDesc2 });
+                            events.push({ time: "21:00-22:30", desc: socDesc3 });
+                        } else if (dayOfWeek === 3) { // Wed
+                            events.push({ time: "18:00-20:00", desc: "複習鍾揚理化上課內容" });
+                            let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            events.push({ time: "20:00-21:30", desc: socDesc1 });
+                            events.push({ time: "21:30-23:00", desc: socDesc2 });
+                        } else if (dayOfWeek === 4) { // Thu
+                            let socDesc1 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            let socDesc2 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            let socDesc3 = advanceProgress && socI < socTopics.length ? socTopics[socI++] : (isBeforeJuly27 ? "✅ 社會 (7/27前進度已達標)" : `社會 (彈性複習)`);
+                            events.push({ time: "18:00-19:30", desc: socDesc1 });
+                            events.push({ time: "19:30-21:00", desc: socDesc2 });
+                            events.push({ time: "21:00-22:30", desc: socDesc3 });
+                        }
+                    }
+                } else if (dayOfWeek === 6) { // Sat
+                    events.push({ time: "07:30-08:00", desc: "早餐" });
+                    events.push({ time: "08:00-09:30", desc: "英文/國文閱讀練習" });
+                    events.push({ time: "09:30-12:00", desc: "英文家教" });
+                    events.push({ time: "12:00-13:30", desc: "中餐+午睡" });
+                    events.push({ time: "13:30-17:30", desc: "鍾揚理化補習班進度班" });
+                    events.push({ time: "17:30-19:00", desc: "運動+洗澡+晚餐" });
+                    events.push({ time: "19:00-21:30", desc: "吳敏男線上國文課" });
+                    events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                } else if (dayOfWeek === 0) { // Sun
+                    events.push({ time: "07:30-08:00", desc: "早餐" });
+                    events.push({ time: "08:00-08:30", desc: "英文/國文閱讀練習" });
+                    events.push({ time: "08:30-12:30", desc: "鍾揚理化補習班總複習班上課" });
+                    events.push({ time: "12:30-14:00", desc: "中餐+午睡" });
+                    events.push({ time: "14:00-15:00", desc: "彈性時間" });
+                    events.push({ time: "15:00-17:00", desc: "地球科學家教" });
+                    events.push({ time: "17:00-19:00", desc: "外出用餐" });
+                    events.push({ time: "19:00-20:30", desc: "複習鍾揚理化上課內容" });
+                    events.push({ time: "20:30-21:30", desc: "複習英文家教上課內容" });
+                    events.push({ time: "21:30-22:30", desc: "彈性時間" });
+                }
             }
 
             schedule.push({ 
                 date: dateStr, 
-                fullDate: fullDateStr,
                 day: dayName, 
                 events: events,
-                countdownName: cdName,
-                countdownDays: cdDays,
-                isExamWeek: isExamWeek
+                countdownDays: calculateCountdown(dateStr)
             });
             curr.setDate(curr.getDate() + 1);
         }
@@ -658,15 +769,14 @@
             // 給每個任務與固定任務產生獨特的 ID，用於 Firebase 辨識與儲存
             const scheduleWithState = rawScheduleText.map(day => ({
                 ...day,
-                dayOfWeek: day.day,
                 fixedTasks: FIXED_TASKS.map(task => ({
-                    id: `${day.fullDate}_fixed_${task}`,
+                    id: `${day.date}_fixed_${task}`,
                     desc: task,
                     completed: false
                 })),
                 events: day.events.map(e => ({ 
                     ...e, 
-                    id: `${day.fullDate}_${e.time}`, 
+                    id: `${day.date}_${e.time}`, 
                     completed: false 
                 }))
             }));
@@ -679,9 +789,8 @@
                 isLoggedIn: false,
                 isLoggingIn: false,
                 historicalUsers: [],
-                printMode: 'single', 
-                selectedWeekForPrint: null,
-                toastMessage: ''
+                printMode: 'single', // 'single' 或 'week'
+                selectedWeekForPrint: null
             }
         },
         computed: {
@@ -697,6 +806,12 @@
                         days: weekDays
                     });
                 }
+                
+                const holidays = GLOBAL_HOLIDAYS;
+                weeks.forEach(w => w.days.forEach(d => {
+                    d.isHoliday = d.day === '六' || d.day === '日' || holidays.includes(d.date);
+                    d.dayOfWeek = d.day;
+                }));
                 return weeks;
             }
         },
@@ -740,7 +855,7 @@
                     
                     isFirebaseReady = true;
 
-                    const savedHistory = localStorage.getItem('schedule2_historical_users');
+                    const savedHistory = localStorage.getItem('schedule_historical_users');
                     if (savedHistory) {
                         try {
                             this.historicalUsers = JSON.parse(savedHistory);
@@ -749,7 +864,7 @@
                         }
                     }
 
-                    const savedUser = localStorage.getItem('schedule2_user_name');
+                    const savedUser = localStorage.getItem('schedule_user_name');
                     if (savedUser) {
                         this.userNameInput = savedUser;
                         this.login();
@@ -765,8 +880,7 @@
                 this.currentUser = this.userNameInput.trim();
                 
                 try {
-                    // 更換集合名稱避免與第一版進度衝突
-                    const baseCollection = collection(db, 'artifacts', globalAppId, 'public', 'data', 'ScheduleData_V2');
+                    const baseCollection = collection(db, 'artifacts', globalAppId, 'public', 'data', 'ScheduleData');
                     const userDocRef = doc(baseCollection, `User_${this.currentUser}`);
                     const globalRef = doc(baseCollection, 'UserList');
                     
@@ -786,11 +900,11 @@
                     });
 
                     this.isLoggedIn = true;
-                    localStorage.setItem('schedule2_user_name', this.currentUser);
+                    localStorage.setItem('schedule_user_name', this.currentUser);
 
                     if (!this.historicalUsers.includes(this.currentUser)) {
                         this.historicalUsers.push(this.currentUser);
-                        localStorage.setItem('schedule2_historical_users', JSON.stringify(this.historicalUsers));
+                        localStorage.setItem('schedule_historical_users', JSON.stringify(this.historicalUsers));
                     }
 
                 } catch (error) {
@@ -808,7 +922,7 @@
                 this.isLoggedIn = false;
                 this.currentUser = '';
                 this.userNameInput = '';
-                localStorage.removeItem('schedule2_user_name');
+                localStorage.removeItem('schedule_user_name');
                 if (currentUserDocUnsubscribe) {
                     currentUserDocUnsubscribe();
                 }
@@ -824,23 +938,17 @@
                     });
                 });
             },
-            showToast(msg) {
-                this.toastMessage = msg;
-                setTimeout(() => {
-                    this.toastMessage = '';
-                }, 3000);
-            },
             async toggleTask(item) {
-                const isNowCompleted = !item.completed;
-                item.completed = isNowCompleted;
-
                 if (!this.isLoggedIn) {
-                    this.showToast('✅ 已暫存打勾！請記得在上方登入，才能永久儲存進度喔！');
+                    console.warn('⚠️ 請先在上方輸入姓名登入，系統才能幫你儲存打勾進度喔！');
                     return;
                 }
 
+                const isNowCompleted = !item.completed;
+                item.completed = isNowCompleted;
+
                 try {
-                    const baseCollection = collection(db, 'artifacts', globalAppId, 'public', 'data', 'ScheduleData_V2');
+                    const baseCollection = collection(db, 'artifacts', globalAppId, 'public', 'data', 'ScheduleData');
                     const userDocRef = doc(baseCollection, `User_${this.currentUser}`);
                     
                     if (isNowCompleted) {
@@ -850,8 +958,7 @@
                     }
                 } catch (error) {
                     console.error("同步至雲端失敗:", error);
-                    item.completed = !isNowCompleted; 
-                    this.showToast('❌ 儲存失敗，請確認網路狀態後重試！');
+                    item.completed = !isNowCompleted;
                 }
             },
             openModal(day) {
@@ -869,49 +976,60 @@
             printWeekly(week) {
                 this.printMode = 'week';
                 this.selectedWeekForPrint = week;
-                document.body.classList.add('printing-week'); 
+                document.body.classList.add('printing-week'); // 手動添加列印專用樣式
                 this.$nextTick(() => {
                     window.print();
+                    // 列印視窗關閉後恢復狀態
                     setTimeout(() => {
                         this.printMode = 'single';
                         this.selectedWeekForPrint = null;
-                        document.body.classList.remove('printing-week'); 
+                        document.body.classList.remove('printing-week'); // 恢復正常樣式
                     }, 500);
                 });
             },
-            isToday(fullDateStr) {
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                return fullDateStr === `${yyyy}-${mm}-${dd}`;
+            getFormattedDate(dateStr) {
+                const parts = dateStr.split('/');
+                const mm = parts[0].padStart(2, '0');
+                const dd = parts[1].padStart(2, '0');
+                return `${mm}/${dd}`;
             },
-            isPast(fullDateStr) {
+            isToday(dateStr) {
                 const today = new Date();
-                const yyyy = today.getFullYear();
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
-                const formattedToday = `${yyyy}-${mm}-${dd}`;
+                const formattedToday = `${mm}/${dd}`;
+                const formattedCardDate = this.getFormattedDate(dateStr);
                 
-                // 起跑日
-                if (formattedToday < '2026-09-21') return false; 
-                return fullDateStr < formattedToday;
+                return formattedCardDate === formattedToday;
             },
-            getDayBorderColor(day, isExamWeek) {
-                if (isExamWeek) return 'border-pink-300 bg-pink-50/20';
+            isPast(dateStr) {
+                const today = new Date();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedToday = `${mm}/${dd}`;
+                const formattedCardDate = this.getFormattedDate(dateStr);
+
+                if (formattedToday < '06/29') return false;
+                
+                return formattedCardDate < formattedToday;
+            },
+            getDayBorderColor(day, date) {
+                const holidays = GLOBAL_HOLIDAYS;
+                if (day === '六' || day === '日' || holidays.includes(date)) return 'border-pink-300 bg-pink-50/20';
                 return 'border-indigo-300';
             },
             getModalHeaderColor(day) {
-                if(this.isToday(day.fullDate)) return 'bg-yellow-100';
-                if(day.isExamWeek) return 'bg-pink-50';
+                if(this.isToday(day.date)) return 'bg-yellow-100';
+                if(day.isHoliday) return 'bg-pink-50';
                 return 'bg-indigo-50';
             },
             getEventStyle(desc) {
                 if (desc.includes('暫停') || desc.includes('延後')) return 'bg-gray-100 border-gray-200 text-gray-500';
-                if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('自由複習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+                if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('閱讀練習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+                if (desc.includes('早餐') || desc.includes('中餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('洗澡') || desc.includes('運動') || desc.includes('用餐') || desc.includes('準備') || desc.includes('午睡')) return 'bg-rose-50 border-rose-200 text-rose-700';
                 
                 if (desc.includes('數學')) return 'bg-blue-50 border-blue-200 text-blue-800';
-                if (desc.includes('自然') || desc.includes('理化') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
+                if (desc.includes('自然') || desc.includes('理化') || desc.includes('地球科學') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文')) return 'bg-red-50 border-red-200 text-red-800';
                 if (desc.includes('國文')) return 'bg-orange-50 border-orange-200 text-orange-800';
                 if (desc.includes('社會') || desc.includes('歷史') || desc.includes('地理') || desc.includes('公民')) return 'bg-green-50 border-green-200 text-green-800';
@@ -919,10 +1037,20 @@
                 return 'bg-white border-gray-200 text-gray-700'; 
             },
             getPrintEventStyle(desc) {
-                return this.getEventStyle(desc);
+                if (desc.includes('暫停') || desc.includes('延後')) return 'bg-gray-100 border-gray-200 text-gray-500';
+                if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('閱讀練習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+                if (desc.includes('早餐') || desc.includes('中餐') || desc.includes('晚餐') || desc.includes('休息') || desc.includes('放鬆') || desc.includes('洗澡') || desc.includes('運動') || desc.includes('用餐') || desc.includes('準備') || desc.includes('午睡')) return 'bg-rose-50 border-rose-200 text-rose-700';
+                
+                if (desc.includes('數學')) return 'bg-blue-50 border-blue-200 text-blue-800';
+                if (desc.includes('自然') || desc.includes('理化') || desc.includes('地球科學') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
+                if (desc.includes('英文')) return 'bg-red-50 border-red-200 text-red-800';
+                if (desc.includes('國文')) return 'bg-orange-50 border-orange-200 text-orange-800';
+                if (desc.includes('社會') || desc.includes('歷史') || desc.includes('地理') || desc.includes('公民')) return 'bg-green-50 border-green-200 text-green-800';
+                
+                return 'bg-white border-gray-200 text-gray-700';
             },
             formatDesc(desc) {
-                let formatted = desc.replace(/(1段|2段|2模|會考)/g, '<span class="font-black underline">$1</span>');
+                let formatted = desc.replace(/(第[1-9]+次模擬考)/g, '<span class="font-black underline">$1</span>');
                 formatted = formatted.replace(/(✅ .*)/g, '<span class="text-emerald-600">$1</span>');
                 formatted = formatted.replace(/(數學|理化|英文|國文|歷史|地理|公民|地科|地球科學|社會|社會科|生物|自然|自然科|文言文)/g, '<span class="font-bold">$1</span>');
                 return formatted;
