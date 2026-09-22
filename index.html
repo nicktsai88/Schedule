@@ -475,13 +475,8 @@
             "理化(大滿貫) 第4冊 單元11 (力與壓力)"
         ];
         
-        // 生物與理化混合陣列 (交替出現)
-        const sciTopics = [];
-        const maxSciLen = Math.max(bioTopics.length, chemTopics.length);
-        for(let i=0; i<maxSciLen; i++) {
-            if(bioTopics[i]) sciTopics.push(bioTopics[i]);
-            if(chemTopics[i]) sciTopics.push(chemTopics[i]);
-        }
+        // 理化優先複習，完成後再接續生物
+        const sciTopics = [...chemTopics, ...bioTopics];
 
         const hisTopics = [
             "歷史(大滿貫) 第3冊 單元5 (商周至隋唐時期)", "歷史(大滿貫) 第3冊 單元6 (宋元與明清時期)",
