@@ -57,7 +57,7 @@
         }
 
         /* 隱藏列印區塊的螢幕顯示 */
-        .custom-print-area {
+        .weekly-print-area {
             display: none;
         }
 
@@ -75,16 +75,20 @@
                 margin: 8mm; /* 縮小邊距以獲得更大空間 */
             }
             
-            /* 如果正在進行自訂範圍列印，隱藏原始網頁內容與其他Modal */
-            body.printing-custom #app > header,
-            body.printing-custom #app > main,
-            body.printing-custom .modal-overlay-print,
-            body.printing-custom .settings-modal {
+            /* 分頁符號 */
+            .page-break {
+                page-break-before: always;
+            }
+
+            /* 如果正在進行四週列印，隱藏原始網頁內容 */
+            body.printing-four-weeks #app > header,
+            body.printing-four-weeks #app > main,
+            body.printing-four-weeks .modal-overlay-print {
                 display: none !important;
             }
 
-            /* 顯示自訂列印區塊 */
-            body.printing-custom .custom-print-area {
+            /* 顯示四週列印區塊 */
+            body.printing-four-weeks .four-weeks-print-area {
                 display: block !important;
                 position: absolute;
                 left: 0;
@@ -93,30 +97,20 @@
                 background: white;
             }
 
-            /* 自動分頁設定 */
-            .print-page {
-                height: 100vh;
-                page-break-after: always;
-                page-break-inside: avoid;
-            }
-            .print-page:last-child {
-                page-break-after: auto;
-            }
-
             /* 讓捲動區域在列印時完全展開 */
-            .custom-print-area * {
+            .four-weeks-print-area * {
                 overflow: visible !important;
             }
 
             /* 原本的單日列印保留 */
-            body:not(.printing-custom) > #app > * {
+            body:not(.printing-four-weeks) > #app > * {
                 visibility: hidden;
             }
-            body:not(.printing-custom) .modal-overlay-print, 
-            body:not(.printing-custom) .modal-overlay-print * {
+            body:not(.printing-four-weeks) .modal-overlay-print, 
+            body:not(.printing-four-weeks) .modal-overlay-print * {
                 visibility: visible;
             }
-            body:not(.printing-custom) .modal-overlay-print {
+            body:not(.printing-four-weeks) .modal-overlay-print {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -127,7 +121,7 @@
                 width: 100% !important;
                 height: auto !important;
             }
-            body:not(.printing-custom) .modal-print-area {
+            body:not(.printing-four-weeks) .modal-print-area {
                 position: relative;
                 width: 100%;
                 max-width: 100% !important;
@@ -165,9 +159,9 @@
                     </h1>
                     <p class="text-blue-100 text-sm mt-1">執行期間：9/21 ～ 1/17 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
                 </div>
-                <!-- 自訂範圍列印按鈕 -->
-                <button @click="openPrintSettings" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full shadow transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-fit print-hide ml-4">
-                    <i class="fas fa-print"></i> 自訂列印範圍
+                <!-- 列印前4週按鈕 -->
+                <button @click="printFourWeeks" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full shadow transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-fit print-hide ml-4">
+                    <i class="fas fa-print"></i> 列印前4週
                 </button>
             </div>
             
@@ -290,59 +284,16 @@
         </div>
     </main>
 
-    <!-- 列印範圍選擇設定視窗 (Modal) -->
-    <transition name="modal">
-        <div v-if="showPrintSettings" class="settings-modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all">
-                <div class="px-6 py-4 border-b border-gray-200 bg-emerald-50 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-emerald-800 flex items-center">
-                        <i class="fas fa-print mr-2 text-emerald-600"></i> 自訂列印範圍
-                    </h3>
-                    <button @click="showPrintSettings = false" class="text-gray-400 hover:text-gray-700 transition-colors">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                <div class="p-6 space-y-5 bg-white">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                            <i class="far fa-calendar-alt text-gray-500"></i> 開始日期
-                        </label>
-                        <input type="date" v-model="printStartDate" :min="scheduleData[0].fullDate" :max="scheduleData[scheduleData.length-1].fullDate" class="w-full border-2 border-gray-300 rounded-lg p-2.5 focus:border-emerald-500 focus:ring-0 font-medium text-gray-700 outline-none transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                            <i class="far fa-calendar-check text-gray-500"></i> 結束日期
-                        </label>
-                        <input type="date" v-model="printEndDate" :min="printStartDate" :max="scheduleData[scheduleData.length-1].fullDate" class="w-full border-2 border-gray-300 rounded-lg p-2.5 focus:border-emerald-500 focus:ring-0 font-medium text-gray-700 outline-none transition-colors">
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-start gap-3">
-                        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                        <p class="text-xs text-blue-800 leading-relaxed font-medium">系統會自動擷取涵蓋範圍的所有排程，並智慧地以<strong class="mx-1">「每頁 4 週」</strong>的格式進行 A4 直式分頁排版。落在區間外側的日期將會自動淡化處理。</p>
-                    </div>
-                </div>
-                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
-                    <button @click="showPrintSettings = false" class="px-5 py-2 text-gray-600 font-bold hover:bg-gray-200 rounded-lg transition-colors">取消</button>
-                    <button @click="executeCustomPrint" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 flex items-center gap-2">
-                        <i class="fas fa-check"></i> 確認列印
-                    </button>
-                </div>
-            </div>
-        </div>
-    </transition>
-
-    <!-- 專屬自訂日期直式列印區塊 (每頁最多4週，自動分頁) -->
-    <div v-if="printMode === 'custom' && printPages.length > 0" class="custom-print-area bg-white text-black z-50">
-        <!-- 自動為每一頁生成一個 100vh 的區塊，透過 CSS 進行 page-break -->
-        <div v-for="(pageWeeks, pIndex) in printPages" :key="pIndex" class="print-page flex flex-col w-full box-border pb-2">
-            
-            <h1 class="text-xl md:text-2xl font-black text-center mb-1 flex items-center justify-center gap-2 flex-shrink-0 pt-1">
-                <i class="fas fa-trophy text-yellow-500"></i> 決戰會考 2模衝刺計畫 
-                <span class="text-base text-gray-600 ml-2 font-bold tracking-wider">({{ printStartDate.replace(/-/g, '/') }} ~ {{ printEndDate.replace(/-/g, '/') }})</span>
+    <!-- 專屬四週直式列印區塊 (僅列印時顯示，強制縮放至一頁) -->
+    <div v-if="printMode === 'four-weeks' && selectedWeeksForPrint.length > 0" class="four-weeks-print-area bg-white text-black z-50">
+        <div class="flex flex-col h-full w-full box-border pb-2">
+            <h1 class="text-xl md:text-2xl font-black text-center mb-1 flex items-center justify-center gap-2 flex-shrink-0">
+                <i class="fas fa-trophy text-yellow-500"></i> 決戰會考 2模衝刺計畫 (前4週)
             </h1>
             
             <div class="flex flex-col flex-grow gap-1.5 overflow-hidden" style="min-height: 0;">
-                <!-- 迴圈渲染此頁包含的週次 -->
-                <div v-for="(week, wIndex) in pageWeeks" :key="wIndex" class="flex-grow flex flex-col border-2 border-gray-800" style="min-height: 0;">
+                <!-- 迴圈渲染前 4 週 -->
+                <div v-for="(week, wIndex) in selectedWeeksForPrint" :key="wIndex" class="flex-grow flex flex-col border-2 border-gray-800" style="min-height: 0;">
                     <!-- 週標題 -->
                     <div class="bg-gray-200 border-b-2 border-gray-800 py-0.5 text-center font-bold text-sm flex-shrink-0">
                         {{ week.title }}
@@ -357,12 +308,7 @@
 
                     <!-- 每日內容 -->
                     <div class="grid grid-cols-7 flex-grow" style="min-height: 0;">
-                        <!-- 透過透明度與灰階淡化處理未被選擇區間涵蓋的日期 -->
-                        <div v-for="day in reorderDays(week.days)" :key="day.date" 
-                             class="border-r border-gray-400 last:border-r-0 p-1 flex flex-col overflow-hidden transition-all" 
-                             style="min-height: 0;"
-                             :class="{'opacity-40 grayscale': day.fullDate < printStartDate || day.fullDate > printEndDate}">
-                            
+                        <div v-for="day in reorderDays(week.days)" :key="day.date" class="border-r border-gray-400 last:border-r-0 p-1 flex flex-col overflow-hidden" style="min-height: 0;">
                             <!-- 日期 -->
                             <div class="font-bold text-[10px] text-center border-b border-gray-300 pb-0.5 mb-0.5 flex-shrink-0">
                                 {{ day.date }}
@@ -397,7 +343,7 @@
 
     <!-- 彈出式閱讀視窗 (Modal) -->
     <transition name="modal">
-        <div v-if="selectedDay && printMode !== 'custom'" class="modal-overlay-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
+        <div v-if="selectedDay && printMode !== 'week'" class="modal-overlay-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 backdrop-blur-sm" @click.self="closeModal">
             <div class="modal-print-area bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 
                 <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center" :class="getModalHeaderColor(selectedDay)">
@@ -660,9 +606,7 @@
                 isLoggingIn: false,
                 historicalUsers: [],
                 printMode: 'single', 
-                showPrintSettings: false,
-                printStartDate: '',
-                printEndDate: '',
+                selectedWeekForPrint: null,
                 toastMessage: ''
             }
         },
@@ -680,24 +624,6 @@
                     });
                 }
                 return weeks;
-            },
-            printPages() {
-                if (!this.printStartDate || !this.printEndDate) return [];
-                
-                const start = this.printStartDate;
-                const end = this.printEndDate;
-                
-                // 篩選出涵蓋在選擇日期區間內的「週」
-                const overlappedWeeks = this.groupedSchedule.filter(week => {
-                    return week.days.some(day => day.fullDate >= start && day.fullDate <= end);
-                });
-                
-                // 以每 4 週為 1 頁進行分段切分
-                const pages = [];
-                for (let i = 0; i < overlappedWeeks.length; i += 4) {
-                    pages.push(overlappedWeeks.slice(i, i + 4));
-                }
-                return pages;
             }
         },
         mounted() {
@@ -705,8 +631,17 @@
             this.scrollToToday();
         },
         methods: {
+            // 將星期日排到最後
             reorderDays(days) {
                 if (!days || days.length === 0) return [];
+                // 找到星期日 (dayOfWeek === '日' 或者是原本 rawScheduleText 裡的 0)
+                // 在現在的資料結構中，第一天通常是 9/21 (一)，所以原本的切法可能星期一就是第一天
+                // 為了確保，我們用 filter 和 sort
+                
+                // 但現在的 groupedSchedule 是按照日期順序切的 7 天
+                // 我們知道起點是 2026/9/21 (一)，所以每週的第一天就是一，最後一天是日
+                // 所以不需要重新排序，直接回傳即可。
+                // 如果需要確保，可以寫一個檢查
                 return days;
             },
             scrollToToday() {
@@ -769,6 +704,7 @@
                 this.currentUser = this.userNameInput.trim();
                 
                 try {
+                    // 更換集合名稱避免與第一版進度衝突
                     const baseCollection = collection(db, 'artifacts', globalAppId, 'public', 'data', 'ScheduleData_V2');
                     const userDocRef = doc(baseCollection, `User_${this.currentUser}`);
                     const globalRef = doc(baseCollection, 'UserList');
@@ -869,30 +805,18 @@
             printModal() {
                 window.print();
             },
-            openPrintSettings() {
-                if (!this.printStartDate) {
-                    this.printStartDate = this.scheduleData[0].fullDate;
-                    
-                    let endObj = new Date(this.printStartDate);
-                    endObj.setDate(endObj.getDate() + 27); // 預設 4 週
-                    
-                    const maxDateObj = new Date(this.scheduleData[this.scheduleData.length-1].fullDate);
-                    if (endObj > maxDateObj) endObj = maxDateObj;
-                    
-                    this.printEndDate = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
-                }
-                this.showPrintSettings = true;
-            },
-            executeCustomPrint() {
-                this.showPrintSettings = false;
-                this.printMode = 'custom';
-                document.body.classList.add('printing-custom'); 
+            printFourWeeks() {
+                this.printMode = 'four-weeks';
+                // 抓取前 4 週
+                this.selectedWeeksForPrint = this.groupedSchedule.slice(0, 4);
                 
+                document.body.classList.add('printing-four-weeks'); 
                 this.$nextTick(() => {
                     window.print();
                     setTimeout(() => {
                         this.printMode = 'single';
-                        document.body.classList.remove('printing-custom'); 
+                        this.selectedWeeksForPrint = [];
+                        document.body.classList.remove('printing-four-weeks'); 
                     }, 500);
                 });
             },
@@ -939,6 +863,7 @@
                 return this.getEventStyle(desc);
             },
             formatDescTextOnly(desc) {
+                // 移除 HTML 標籤，純文字顯示用在空間狹小的列印區
                 return desc.replace(/✅ /g, '');
             },
             formatDesc(desc) {
