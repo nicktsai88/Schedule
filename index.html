@@ -762,12 +762,9 @@
                     return week.days.some(day => day.fullDate >= start && day.fullDate <= end);
                 });
                 
-                // 以每 4 週為 1 頁進行分段切分
-                const pages = [];
-                for (let i = 0; i < overlappedWeeks.length; i += 4) {
-                    pages.push(overlappedWeeks.slice(i, i + 4));
-                }
-                return pages;
+                // 取消強制 4 週分段，直接回傳全部的週次作為一整頁，
+                // 讓瀏覽器根據剩餘空間自動「接續列印」與自然換頁
+                return [overlappedWeeks];
             }
         },
         mounted() {
