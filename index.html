@@ -93,14 +93,9 @@
                 background: white;
             }
 
-            /* 自動分頁與高度設定 (修正：讓高度自然延伸) */
+            /* 自動分頁與高度設定 (修正：讓高度自然延伸、不強制換頁) */
             .print-page {
-                min-height: 100vh;
-                page-break-after: always;
-                page-break-inside: auto;
-            }
-            .print-page:last-child {
-                page-break-after: auto;
+                width: 100%;
             }
 
             /* 避免週次被截斷 */
@@ -298,7 +293,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-start gap-3">
                         <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                        <p class="text-xs text-blue-800 leading-relaxed font-medium">系統會自動擷取涵蓋範圍的所有排程，並智慧地以<strong class="mx-1">「每頁 4 週」</strong>的格式進行 A4 橫式分頁排版。落在區間外側的日期將會自動淡化處理。</p>
+                        <p class="text-xs text-blue-800 leading-relaxed font-medium">系統會自動擷取涵蓋範圍的所有排程，並智慧地進行 A4 橫式列印排版。落在區間外側的日期將會自動淡化處理。</p>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
@@ -311,7 +306,7 @@
         </div>
     </transition>
 
-    <!-- 專屬自訂日期列印區塊 (每頁最多4週，自動分頁，自然長高) -->
+    <!-- 專屬自訂日期列印區塊 (接續列印，自然長高) -->
     <div v-if="printMode === 'custom' && printPages.length > 0" class="custom-print-area bg-white text-black z-50">
         
         <div v-for="(pageWeeks, pIndex) in printPages" :key="pIndex" class="print-page flex flex-col w-full box-border pb-2">
@@ -322,7 +317,7 @@
             </h1>
             
             <div class="flex flex-col gap-2">
-                <!-- 取消了 flex-grow，讓每一週的高度可以自然伸展 -->
+                <!-- 每一週的高度自然伸展，不強制換頁 -->
                 <div v-for="(week, wIndex) in pageWeeks" :key="wIndex" class="flex flex-col border-2 border-gray-800 break-inside-avoid">
                     <!-- 星期幾標頭 (星期一至星期日) -->
                     <div class="grid grid-cols-7 border-b-2 border-gray-800 bg-gray-100 flex-shrink-0">
@@ -454,7 +449,6 @@
             ],
             "11/1": [
                 "國文(大滿貫) 單元10 品賞寫作技巧",
-                "國文(3800) 第1~3回 錯題複習",
                 "數學(大滿貫) 單元10 乘法公式與多項式",
                 "理化(大滿貫) 單元8 酸鹼鹽",
                 "理化(大滿貫) 單元9 反應速率與反應平衡",
@@ -464,6 +458,7 @@
                 "公民(大滿貫) 單元9 權利救濟"
             ],
             "11/2": [
+                "國文(3800) 第1~3回 (錯題複習)",
                 "國文(3800) 第4回 (第3冊)"
             ],
             "11/3": [
@@ -623,7 +618,7 @@
 
         const schedule = [];
         let curr = new Date(2026, 8, 21); // 2026/09/21
-        const end = new Date(2027, 1, 28); // 2027/02/28 (結束日期延後至二月底以涵蓋新進度)
+        const end = new Date(2027, 1, 28); // 2027/02/28
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -762,8 +757,7 @@
                     return week.days.some(day => day.fullDate >= start && day.fullDate <= end);
                 });
                 
-                // 取消強制 4 週分段，直接回傳全部的週次作為一整頁，
-                // 讓瀏覽器根據剩餘空間自動「接續列印」與自然換頁
+                // 直接回傳全部的週次作為一個大群組，讓瀏覽器自然換頁、接續列印
                 return [overlappedWeeks];
             }
         },
