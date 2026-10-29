@@ -93,14 +93,19 @@
                 background: white;
             }
 
-            /* 自動分頁設定 */
+            /* 自動分頁與高度設定 (修正：讓高度自然延伸) */
             .print-page {
                 min-height: 100vh;
                 page-break-after: always;
-                page-break-inside: avoid;
+                page-break-inside: auto;
             }
             .print-page:last-child {
                 page-break-after: auto;
+            }
+
+            /* 避免週次被截斷 */
+            .break-inside-avoid {
+                page-break-inside: avoid;
             }
 
             /* 讓捲動區域在列印時完全展開 */
@@ -293,7 +298,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-start gap-3">
                         <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                        <p class="text-xs text-blue-800 leading-relaxed font-medium">系統會自動擷取涵蓋範圍的所有排程，並智慧地以<strong class="mx-1">「每頁 4 週」</strong>的格式進行 A4 直式分頁排版。落在區間外側的日期將會自動淡化處理。</p>
+                        <p class="text-xs text-blue-800 leading-relaxed font-medium">系統會自動擷取涵蓋範圍的所有排程，並智慧地以<strong class="mx-1">「每頁 4 週」</strong>的格式進行 A4 橫式分頁排版。落在區間外側的日期將會自動淡化處理。</p>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
@@ -306,19 +311,19 @@
         </div>
     </transition>
 
-    <!-- 專屬自訂日期直式列印區塊 (每頁最多4週，自動分頁) -->
+    <!-- 專屬自訂日期列印區塊 (每頁最多4週，自動分頁，自然長高) -->
     <div v-if="printMode === 'custom' && printPages.length > 0" class="custom-print-area bg-white text-black z-50">
-        <!-- 自動為每一頁生成一個 100vh 的區塊，透過 CSS 進行 page-break -->
+        
         <div v-for="(pageWeeks, pIndex) in printPages" :key="pIndex" class="print-page flex flex-col w-full box-border pb-2">
             
-            <h1 class="text-xl md:text-2xl font-black text-center mb-1 flex items-center justify-center gap-2 flex-shrink-0 pt-1">
+            <h1 class="text-xl md:text-2xl font-black text-center mb-2 mt-2 flex items-center justify-center gap-2 flex-shrink-0">
                 <i class="fas fa-trophy text-yellow-500"></i> 決戰會考 2模衝刺計畫 
                 <span class="text-base text-gray-600 ml-2 font-bold tracking-wider">({{ printStartDate.replace(/-/g, '/') }} ~ {{ printEndDate.replace(/-/g, '/') }})</span>
             </h1>
             
-            <div class="flex flex-col flex-grow gap-1.5 overflow-hidden" style="min-height: 0;">
-                <!-- 迴圈渲染此頁包含的週次 -->
-                <div v-for="(week, wIndex) in pageWeeks" :key="wIndex" class="flex-grow flex flex-col border-2 border-gray-800" style="min-height: 0;">
+            <div class="flex flex-col gap-2">
+                <!-- 取消了 flex-grow，讓每一週的高度可以自然伸展 -->
+                <div v-for="(week, wIndex) in pageWeeks" :key="wIndex" class="flex flex-col border-2 border-gray-800 break-inside-avoid">
                     <!-- 星期幾標頭 (星期一至星期日) -->
                     <div class="grid grid-cols-7 border-b-2 border-gray-800 bg-gray-100 flex-shrink-0">
                         <div v-for="dayName in ['一', '二', '三', '四', '五', '六', '日']" :key="dayName" class="text-center font-bold text-[10px] py-0.5 border-r border-gray-400 last:border-r-0">
@@ -326,12 +331,10 @@
                         </div>
                     </div>
 
-                    <!-- 每日內容 -->
-                    <div class="grid grid-cols-7 flex-grow" style="min-height: 0;">
-                        <!-- 透過透明度與灰階淡化處理未被選擇區間涵蓋的日期 -->
+                    <!-- 每日內容 (自然高度不裁切) -->
+                    <div class="grid grid-cols-7">
                         <div v-for="day in reorderDays(week.days)" :key="day.date" 
-                             class="border-r border-gray-400 last:border-r-0 p-1 flex flex-col overflow-hidden transition-all" 
-                             style="min-height: 0;"
+                             class="border-r border-gray-400 last:border-r-0 p-1 flex flex-col transition-all" 
                              :class="{'opacity-40 grayscale': day.fullDate < printStartDate || day.fullDate > printEndDate}">
                             
                             <!-- 日期 -->
@@ -344,9 +347,9 @@
                                 {{ day.countdownName }}{{ day.countdownDays }}天
                             </div>
 
-                            <!-- 主要進度 -->
-                            <div class="flex flex-col gap-0.5 overflow-hidden flex-grow" style="min-height: 0;">
-                                <div v-for="event in day.events" :key="event.id" class="p-0.5 border rounded text-[9px] leading-tight overflow-hidden" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <!-- 主要進度，移除隱藏裁切設定 -->
+                            <div class="flex flex-col gap-0.5 h-full">
+                                <div v-for="event in day.events" :key="event.id" class="p-0.5 border rounded text-[9px] leading-tight" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
                                     <div class="font-bold break-words">{{ formatDescTextOnly(event.desc) }}</div>
                                 </div>
                             </div>
@@ -437,9 +440,7 @@
     let globalAppId = 'default-app-id';
     let currentUserDocUnsubscribe = null;
 
-    const FIXED_TASKS = ["國文會考題組3篇", "英文會考題組3篇", "文言文1篇"];
-
-    // 透過閉包自動化生成 2026/9/21 ~ 2027/1/17 的所有課表
+    // 透過閉包自動化生成 2026/9/21 ~ 2027/2/28 的所有課表
     const rawScheduleText = (() => {
         // 全新客製化精準排程對照表 (依照指定日期)
         const customSchedule = {
@@ -447,7 +448,9 @@
                 "地理(大滿貫) 單元10 東南亞與南亞"
             ],
             "10/31": [
-                "歷史(3800) 第4~6回 模擬測驗"
+                "歷史(3800) 第4回 (第3冊)",
+                "歷史(3800) 第5回 (1~3冊)",
+                "歷史(3800) 第6回 (第4冊)"
             ],
             "11/1": [
                 "國文(大滿貫) 單元10 品賞寫作技巧",
@@ -473,10 +476,13 @@
                 "自然(3800) 第5回 (1~3冊)"
             ],
             "11/6": [
-                "地理(3800) 第4~6回 模擬測驗"
+                "地理(3800) 第4回 (第3冊)",
+                "地理(3800) 第5回 (1~3冊)",
+                "地理(3800) 第6回 (第4冊)"
             ],
             "11/7": [
-                "歷史(3800) 第7~8回 模擬測驗"
+                "歷史(3800) 第7回 (3~4冊)",
+                "歷史(3800) 第8回 (1~4冊)"
             ],
             "11/8": [
                 "國文(大滿貫) 單元11 領會句義",
@@ -484,7 +490,8 @@
                 "理化(大滿貫) 單元10 有機化合物",
                 "理化(大滿貫) 單元11 力與壓力",
                 "公民(大滿貫) 單元10 青少年法律",
-                "公民(3800) 第4~5回 模擬測驗"
+                "公民(3800) 第4回 (第3冊)",
+                "公民(3800) 第5回 (1~3冊)"
             ],
             "11/9": [
                 "國文(3800) 第5回 (1~3冊)"
@@ -499,12 +506,15 @@
                 "自然(3800) 第6回 (第4冊)"
             ],
             "11/13": [
-                "地理(3800) 第7~8回 模擬測驗"
+                "地理(3800) 第7回 (3~4冊)",
+                "地理(3800) 第8回 (12/28)"
             ],
             "11/15": [
                 "國文(大滿貫) 單元12 填空與重組",
                 "數學(大滿貫) 單元12 因式分解與一元二次方程式",
-                "公民(3800) 第6~8回 模擬測驗"
+                "公民(3800) 第6回 (第4冊)",
+                "公民(3800) 第7回 (3~4冊)",
+                "公民(3800) 第8回 (1~4冊)"
             ],
             "11/16": [
                 "國文(3800) 第6回 (第4冊)"
@@ -518,10 +528,8 @@
             "11/19": [
                 "自然(3800) 第7回 (3~4冊)"
             ],
-            "11/29": [
-                "國文(大滿貫) 單元13 閱讀圖文表"
-            ],
             "11/30": [
+                "國文(大滿貫) 單元13 閱讀圖文表",
                 "國文(3800) 第7回 (3~4冊)"
             ],
             "12/1": [
@@ -653,8 +661,8 @@
             else if (curr >= mock2Start && curr <= mock2End) isExamWeek = true;
 
             if (curr < newStart) {
-                // 10/26 前的日期標示為已達標
-                events.push({ time: "今日進度", desc: "✅ 10/26前進度已達標" });
+                // 10/29 前的日期標示為已達標
+                events.push({ time: "今日進度", desc: "✅ 10/29前進度已達標" });
             } else {
                 // 讀取這天是否有自訂指定的進度
                 const tasksForDay = customSchedule[dateKey];
@@ -710,14 +718,9 @@
             const scheduleWithState = rawScheduleText.map(day => ({
                 ...day,
                 dayOfWeek: day.day,
-                fixedTasks: FIXED_TASKS.map(task => ({
-                    id: `${day.fullDate}_fixed_${task}`,
-                    desc: task,
-                    completed: false
-                })),
                 events: day.events.map(e => ({ 
                     ...e, 
-                    id: `${day.fullDate}_${e.time}`, 
+                    id: `${day.fullDate}_${e.time}_${e.desc}`, 
                     completed: false 
                 }))
             }));
@@ -742,11 +745,7 @@
                 const weeks = [];
                 for(let i = 0; i < this.scheduleData.length; i += 7) {
                     const weekDays = this.scheduleData.slice(i, i + 7);
-                    const weekIndex = Math.floor(i / 7);
-                    let title = `第 ${weekIndex + 1} 週 衝刺進度`;
-
                     weeks.push({
-                        title: title,
                         days: weekDays
                     });
                 }
@@ -890,9 +889,6 @@
             },
             syncLocalSchedule(completedList) {
                 this.scheduleData.forEach(day => {
-                    day.fixedTasks.forEach(task => {
-                        task.completed = completedList.includes(task.id);
-                    });
                     day.events.forEach(event => {
                         event.completed = completedList.includes(event.id);
                     });
@@ -998,8 +994,8 @@
                 if (desc.includes('暫停') || desc.includes('延後')) return 'bg-gray-100 border-gray-200 text-gray-500';
                 if (desc === '彈性時間' || desc.includes('背誦') || desc.includes('自由複習')) return 'bg-cyan-50 border-cyan-200 text-cyan-700';
                 
-                if (desc.includes('數學')) return 'bg-blue-50 border-blue-200 text-blue-800';
-                if (desc.includes('自然') || desc.includes('理化') || desc.includes('生物')) return 'bg-purple-50 border-purple-200 text-purple-800';
+                if (desc.includes('數學') || desc.includes('3688')) return 'bg-blue-50 border-blue-200 text-blue-800';
+                if (desc.includes('自然') || desc.includes('理化') || desc.includes('生物') || desc.includes('文揚')) return 'bg-purple-50 border-purple-200 text-purple-800';
                 if (desc.includes('英文')) return 'bg-red-50 border-red-200 text-red-800';
                 if (desc.includes('國文')) return 'bg-orange-50 border-orange-200 text-orange-800';
                 if (desc.includes('社會') || desc.includes('歷史') || desc.includes('地理') || desc.includes('公民')) return 'bg-green-50 border-green-200 text-green-800';
