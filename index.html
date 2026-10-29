@@ -311,17 +311,17 @@
         
         <div v-for="(pageWeeks, pIndex) in printPages" :key="pIndex" class="print-page flex flex-col w-full box-border pb-2">
             
-            <h1 class="text-xl md:text-2xl font-black text-center mb-2 mt-2 flex items-center justify-center gap-2 flex-shrink-0">
+            <h1 class="text-3xl font-black text-center mb-4 mt-3 flex items-center justify-center gap-2 flex-shrink-0">
                 <i class="fas fa-trophy text-yellow-500"></i> 決戰會考 2模衝刺計畫 
-                <span class="text-base text-gray-600 ml-2 font-bold tracking-wider">({{ printStartDate.replace(/-/g, '/') }} ~ {{ printEndDate.replace(/-/g, '/') }})</span>
+                <span class="text-xl text-gray-600 ml-2 font-bold tracking-wider">({{ printStartDate.replace(/-/g, '/') }} ~ {{ printEndDate.replace(/-/g, '/') }})</span>
             </h1>
             
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-4">
                 <!-- 每一週的高度自然伸展，不強制換頁 -->
                 <div v-for="(week, wIndex) in pageWeeks" :key="wIndex" class="flex flex-col border-2 border-gray-800 break-inside-avoid">
                     <!-- 星期幾標頭 (星期一至星期日) -->
                     <div class="grid grid-cols-7 border-b-2 border-gray-800 bg-gray-100 flex-shrink-0">
-                        <div v-for="dayName in ['一', '二', '三', '四', '五', '六', '日']" :key="dayName" class="text-center font-bold text-[10px] py-0.5 border-r border-gray-400 last:border-r-0">
+                        <div v-for="dayName in ['一', '二', '三', '四', '五', '六', '日']" :key="dayName" class="text-center font-bold text-sm py-1.5 border-r border-gray-400 last:border-r-0">
                             星期{{ dayName }}
                         </div>
                     </div>
@@ -329,22 +329,22 @@
                     <!-- 每日內容 (自然高度不裁切) -->
                     <div class="grid grid-cols-7">
                         <div v-for="day in reorderDays(week.days)" :key="day.date" 
-                             class="border-r border-gray-400 last:border-r-0 p-1 flex flex-col transition-all" 
+                             class="border-r border-gray-400 last:border-r-0 p-1.5 flex flex-col transition-all" 
                              :class="{'opacity-40 grayscale': day.fullDate < printStartDate || day.fullDate > printEndDate}">
                             
                             <!-- 日期 -->
-                            <div class="font-bold text-[10px] text-center border-b border-gray-300 pb-0.5 mb-0.5 flex-shrink-0">
+                            <div class="font-bold text-[15px] text-center border-b border-gray-300 pb-1 mb-1.5 flex-shrink-0">
                                 {{ day.date }}
                             </div>
                             
                             <!-- 倒數 -->
-                            <div v-if="day.countdownName" class="text-[9px] text-red-600 font-bold text-center mb-0.5 leading-tight flex-shrink-0">
+                            <div v-if="day.countdownName" class="text-xs text-red-600 font-bold text-center mb-1.5 leading-tight flex-shrink-0">
                                 {{ day.countdownName }}{{ day.countdownDays }}天
                             </div>
 
                             <!-- 主要進度，移除隱藏裁切設定 -->
-                            <div class="flex flex-col gap-0.5 h-full">
-                                <div v-for="event in day.events" :key="event.id" class="p-0.5 border rounded text-[9px] leading-tight" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
+                            <div class="flex flex-col gap-1.5 h-full">
+                                <div v-for="event in day.events" :key="event.id" class="p-1.5 border rounded text-[13px] leading-tight" :class="[getPrintEventStyle(event.desc), event.completed ? 'opacity-50' : '']">
                                     <div class="font-bold break-words">{{ formatDescTextOnly(event.desc) }}</div>
                                 </div>
                             </div>
