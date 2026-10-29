@@ -163,7 +163,7 @@
                     <h1 class="text-2xl font-black tracking-wider flex items-center">
                         <i class="fas fa-trophy text-yellow-400 mr-2"></i>決戰會考 2模衝刺計畫
                     </h1>
-                    <p class="text-blue-100 text-sm mt-1">執行期間：9/21 ～ 1/17 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
+                    <p class="text-blue-100 text-sm mt-1">執行期間：9/21 ～ 2/28 | <i class="fas fa-cloud text-blue-200 mx-1"></i> 進度自動雲端儲存</p>
                 </div>
                 <!-- 自訂範圍列印按鈕 -->
                 <button @click="openPrintSettings" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full shadow transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-fit print-hide ml-4">
@@ -497,75 +497,194 @@
 
     // 透過閉包自動化生成 2026/9/21 ~ 2027/1/17 的所有課表
     const rawScheduleText = (() => {
-        const chiTopics = [
-            "國文(大滿貫) 第3冊 單元9 (7~10課)", "國文(大滿貫) 第4冊 單元10 (1~3課)",
-            "國文(大滿貫) 第4冊 單元11 (4~6課)", "國文(大滿貫) 第4冊 單元12 (7~10課)",
-            "國文會考模擬試題 1~4冊"
-        ];
-        
-        const engTopics = [
-            "英文(大滿貫) 第3冊 單元7 (3~4課)", "英文(大滿貫) 第3冊 單元8 (5~6課)",
-            "英文會考模擬試題 (1~3冊複習)", "英文(大滿貫) 第4冊 單元9 (1~2課)",
-            "英文(大滿貫) 第4冊 單元10 (3~4課)", "英文(大滿貫) 第4冊 單元11 (5~6課)",
-            "英文會考模擬試題 (1~4冊複習)"
-        ];
-        
-        const mathTopics = [
-            "數學(大滿貫) 第4冊 單元16 (平行與四邊形)", "數學(大滿貫) 第4冊 單元13 (數列與級數)",
-            "數學(大滿貫) 第4冊 單元14 (線型函數)", "數學(大滿貫) 第3冊 單元10 (乘法公式與多項式)",
-            "數學(大滿貫) 第3冊 單元11 (平方根與畢氏定理)", "數學(大滿貫) 第3冊 單元12 (因式分解與一元二次方程式)"
-        ];
-        
-        const bioTopics = [
-            "生物(大滿貫) 第2冊 單元6 (生殖)", "生物(大滿貫) 第2冊 單元7 (遺傳)",
-            "生物(大滿貫) 第2冊 單元8 (演化與分類)", "生物(大滿貫) 第2冊 單元9 (生態系與環境保護)"
-        ];
-        
-        const chemTopics = [
-            "理化(大滿貫) 第4冊 單元7 (化學劑量/化學反應/氧化還原)", "理化(大滿貫) 第4冊 單元8 (酸鹼鹽)",
-            "理化(大滿貫) 第4冊 單元9 (反應速率與平衡)", "理化(大滿貫) 第4冊 單元10 (有機化合物)",
-            "理化(大滿貫) 第4冊 單元11 (力與壓力)"
-        ];
-        
-        // 理化優先複習，完成後再接續生物
-        const sciTopics = [...chemTopics, ...bioTopics];
-
-        const hisTopics = [
-            "歷史(大滿貫) 第3冊 單元6 (宋元與明清時期)", "歷史(大滿貫) 第3冊 單元7 (西力衝擊下的晚清與東亞)",
-            "歷史(大滿貫) 第4冊 單元8 (中華民國的建立與社會變遷)", "歷史(大滿貫) 第4冊 單元9 (現代國家的挑戰與變局)",
-            "歷史(大滿貫) 第4冊 單元10 (共黨政權在中國與當代東亞的局勢)"
-        ];
-        
-        const geoTopics = [
-            "地理(KO) 第3冊 單元8 中國的產業、經濟發展與全球關聯", "地理(KO) 第3冊 單元9 全球氣候概述、東北亞",
-            "地理(KO) 第4冊 單元10 東南亞與南亞", "地理(KO) 第4冊 單元11 西亞與北非",
-            "地理(KO) 第4冊 單元12 漠南非洲"
-        ];
-        
-        const civTopics = [
-            "公民(大滿貫) 第3冊 單元6 法治與權力分立、中央政府", "公民(大滿貫) 第3冊 單元7 地方政府與政治參與",
-            "公民(大滿貫) 第4冊 單元8 民法、刑法與行政法", "公民(大滿貫) 第4冊 單元9 權利救濟",
-            "公民(大滿貫) 第4冊 單元10 青少年法律"
-        ];
-
-        let cI = 0, eI = 0, mI = 0, sI = 0, hI = 0, gI = 0, civI = 0;
+        // 全新客製化精準排程對照表 (依照指定日期)
+        const customSchedule = {
+            "10/30": [
+                "地理(大滿貫) 單元10 東南亞與南亞"
+            ],
+            "10/31": [
+                "歷史(3800) 第4~6回 模擬測驗"
+            ],
+            "11/1": [
+                "國文(大滿貫) 單元10 品賞寫作技巧",
+                "國文(3800) 第1~3回 錯題複習",
+                "數學(大滿貫) 單元10 乘法公式與多項式",
+                "理化(大滿貫) 單元8 酸鹼鹽",
+                "理化(大滿貫) 單元9 反應速率與反應平衡",
+                "地理(大滿貫) 單元11 西亞與北非",
+                "地理(大滿貫) 單元12 漠南非洲",
+                "公民(大滿貫) 單元8 民法、刑法與行政法",
+                "公民(大滿貫) 單元9 權利救濟"
+            ],
+            "11/2": [
+                "國文(3800) 第4回 (第3冊)"
+            ],
+            "11/3": [
+                "數學(3800) 第4回 (第3冊)"
+            ],
+            "11/4": [
+                "英文(3800) 第4回 (第3冊)"
+            ],
+            "11/5": [
+                "自然(3800) 第5回 (1~3冊)"
+            ],
+            "11/6": [
+                "地理(3800) 第4~6回 模擬測驗"
+            ],
+            "11/7": [
+                "歷史(3800) 第7~8回 模擬測驗"
+            ],
+            "11/8": [
+                "國文(大滿貫) 單元11 領會句義",
+                "數學(大滿貫) 單元11 平方根與畢氏定理",
+                "理化(大滿貫) 單元10 有機化合物",
+                "理化(大滿貫) 單元11 力與壓力",
+                "公民(大滿貫) 單元10 青少年法律",
+                "公民(3800) 第4~5回 模擬測驗"
+            ],
+            "11/9": [
+                "國文(3800) 第5回 (1~3冊)"
+            ],
+            "11/10": [
+                "數學(3800) 第5回 (1~3冊)"
+            ],
+            "11/11": [
+                "英文(3800) 第5回 (1~3冊)"
+            ],
+            "11/12": [
+                "自然(3800) 第6回 (第4冊)"
+            ],
+            "11/13": [
+                "地理(3800) 第7~8回 模擬測驗"
+            ],
+            "11/15": [
+                "國文(大滿貫) 單元12 填空與重組",
+                "數學(大滿貫) 單元12 因式分解與一元二次方程式",
+                "公民(3800) 第6~8回 模擬測驗"
+            ],
+            "11/16": [
+                "國文(3800) 第6回 (第4冊)"
+            ],
+            "11/17": [
+                "數學(3800) 第6回 (第4冊)"
+            ],
+            "11/18": [
+                "英文(3800) 第6回 (第4冊)"
+            ],
+            "11/19": [
+                "自然(3800) 第7回 (3~4冊)"
+            ],
+            "11/29": [
+                "國文(大滿貫) 單元13 閱讀圖文表"
+            ],
+            "11/30": [
+                "國文(3800) 第7回 (3~4冊)"
+            ],
+            "12/1": [
+                "數學(3800) 第7回 (3~4冊)"
+            ],
+            "12/2": [
+                "英文(3800) 第7回 (3~4冊)"
+            ],
+            "12/3": [
+                "自然(3800) 第8回 (1~4冊)"
+            ],
+            "12/6": [
+                "國文(大滿貫) 單元14 閱讀白話文"
+            ],
+            "12/7": [
+                "國文(3800) 第8回 (1~4冊)"
+            ],
+            "12/8": [
+                "數學(3800) 第8回 (1~4冊)"
+            ],
+            "12/9": [
+                "英文(3800) 第8回 (1~4冊)"
+            ],
+            "12/10": [
+                "自然(文揚) 第7回 (3~4冊)"
+            ],
+            "12/13": [
+                "國文(大滿貫) 單元15 閱讀詩詞曲"
+            ],
+            "12/14": [
+                "國文(3800) 第9回 (1~5冊)"
+            ],
+            "12/15": [
+                "數學(3688) 第7回 (1~4冊)"
+            ],
+            "12/16": [
+                "英文(3800) 第9回 (1~5冊)"
+            ],
+            "12/17": [
+                "自然(文揚) 第8回 (1~4冊)"
+            ],
+            "12/27": [
+                "國文(大滿貫) 單元16 閱讀文言文"
+            ],
+            "12/28": [
+                "國文(3800) 第10回 (5~6冊)"
+            ],
+            "12/30": [
+                "英文(3800) 第10回 (5~6冊)"
+            ],
+            "1/3": [
+                "國文(大滿貫) 單元17 進階閱讀素養"
+            ],
+            "1/4": [
+                "國文(3800) 第11回 (1~6冊)"
+            ],
+            "1/6": [
+                "英文(3800) 第11回 (1~6冊)"
+            ],
+            "1/18": [
+                "國文(3800) 第12回 (1~6冊)"
+            ],
+            "1/20": [
+                "英文(3800) 第12回 (1~6冊)"
+            ],
+            "1/25": [
+                "國文(3800) 第13回 (1~6冊)"
+            ],
+            "1/27": [
+                "英文(3800) 第13回 (1~6冊)"
+            ],
+            "2/1": [
+                "國文(3800) 第14回 (1~6冊)"
+            ],
+            "2/3": [
+                "英文(3800) 第14回 (1~6冊)"
+            ],
+            "2/8": [
+                "國文(3800) 第15回 (1~6冊)"
+            ],
+            "2/10": [
+                "英文(3800) 第15回 (1~6冊)"
+            ],
+            "2/15": [
+                "國文(3800) 第16回 (1~6冊)"
+            ],
+            "2/17": [
+                "英文(3800) 第16回 (1~6冊)"
+            ]
+        };
 
         const schedule = [];
         let curr = new Date(2026, 8, 21); // 2026/09/21
-        const end = new Date(2027, 0, 17); // 2027/01/17
+        const end = new Date(2027, 1, 28); // 2027/02/28 (結束日期延後至二月底以涵蓋新進度)
         
         const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
 
         // 定義防撞考試週
         const exam1Start = new Date(2026, 9, 12); // 10/12
         const exam1End = new Date(2026, 9, 18);   // 10/18
-        const exam2Start = new Date(2026, 10, 23); // 11/23
-        const exam2End = new Date(2026, 10, 29);   // 11/29
-        const mock2Start = new Date(2026, 11, 21); // 12/21
-        const mock2End = new Date(2026, 11, 27);   // 12/27
+        const exam2Start = new Date(2026, 10, 26); // 11/26 (二段)
+        const exam2End = new Date(2026, 10, 27);   // 11/27 (二段)
+        const mock2Start = new Date(2026, 11, 23); // 12/23 (二模)
+        const mock2End = new Date(2026, 11, 24);   // 12/24 (二模)
 
-        // 新進度起跑日
-        const newStart = new Date(2026, 9, 5); // 10/5
+        // 新進度起跑日 10/29
+        const newStart = new Date(2026, 9, 29); // 10/29
 
         // 目標倒數日
         const target1 = new Date(2026, 9, 15); // 1段 10/15
@@ -573,38 +692,43 @@
         const targetMock2 = new Date(2026, 11, 23); // 2模 12/23
 
         while (curr <= end) {
-            const dateStr = `${curr.getMonth() + 1}/${String(curr.getDate()).padStart(2, '0')}`;
-            const fullDateStr = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
+            const month = curr.getMonth() + 1;
+            const date = curr.getDate();
+            const dateKey = `${month}/${date}`; // 產生日期的 Key 用來配對，例如 "10/26"
+
+            const dateStr = `${month}/${String(date).padStart(2, '0')}`;
+            const fullDateStr = `${curr.getFullYear()}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
             const dayOfWeek = curr.getDay();
             const dayName = dayNames[dayOfWeek];
 
             let events = [];
             let isExamWeek = false;
 
-            if (curr < newStart) {
-                // 10/5 前的日期標示為衝刺第5冊新進度
-                events.push({ time: "今日進度", desc: "✅ 衝刺第5冊新進度" });
-            } else if (curr >= exam1Start && curr <= exam1End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "📝 1段 考試週 (暫停進度)" });
-            } else if (curr >= exam2Start && curr <= exam2End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "📝 2段 考試週 (暫停進度)" });
-            } else if (curr >= mock2Start && curr <= mock2End) {
-                isExamWeek = true;
-                events.push({ time: "全天", desc: "🎯 2模 考試週 (暫停進度)" });
-            } else {
-                // 正常推進度 (星期一(英文)/星期二(自然)/星期三(國文)/星期四(數學)/星期五(地理)/星期六(歷史)/星期日(公民))
-                let desc = "彈性時間";
-                if (dayOfWeek === 1) desc = eI < engTopics.length ? engTopics[eI++] : "英文 (進度已達標，自由複習)";
-                else if (dayOfWeek === 2) desc = sI < sciTopics.length ? sciTopics[sI++] : "自然 (進度已達標，自由複習)";
-                else if (dayOfWeek === 3) desc = cI < chiTopics.length ? chiTopics[cI++] : "國文 (進度已達標，自由複習)";
-                else if (dayOfWeek === 4) desc = mI < mathTopics.length ? mathTopics[mI++] : "數學 (進度已達標，自由複習)";
-                else if (dayOfWeek === 5) desc = gI < geoTopics.length ? geoTopics[gI++] : "地理 (進度已達標，自由複習)";
-                else if (dayOfWeek === 6) desc = hI < hisTopics.length ? hisTopics[hI++] : "歷史 (進度已達標，自由複習)";
-                else if (dayOfWeek === 0) desc = civI < civTopics.length ? civTopics[civI++] : "公民 (進度已達標，自由複習)";
+            if (curr >= exam1Start && curr <= exam1End) isExamWeek = true;
+            else if (curr >= exam2Start && curr <= exam2End) isExamWeek = true;
+            else if (curr >= mock2Start && curr <= mock2End) isExamWeek = true;
 
-                events.push({ time: "今日進度", desc: desc });
+            if (curr < newStart) {
+                // 10/26 前的日期標示為已達標
+                events.push({ time: "今日進度", desc: "✅ 10/26前進度已達標" });
+            } else {
+                // 讀取這天是否有自訂指定的進度
+                const tasksForDay = customSchedule[dateKey];
+                
+                if (tasksForDay && tasksForDay.length > 0) {
+                    tasksForDay.forEach(task => {
+                        events.push({ time: "今日進度", desc: task });
+                    });
+                } else {
+                    // 若無自訂進度且為考試週，則顯示防撞休息，否則顯示彈性時間
+                    if (isExamWeek) {
+                        if (curr >= exam1Start && curr <= exam1End) events.push({ time: "全天", desc: "📝 1段 考試週 (暫停進度)" });
+                        else if (curr >= exam2Start && curr <= exam2End) events.push({ time: "全天", desc: "📝 2段 考試週 (暫停進度)" });
+                        else if (curr >= mock2Start && curr <= mock2End) events.push({ time: "全天", desc: "🎯 2模 考試週 (暫停進度)" });
+                    } else {
+                        events.push({ time: "今日進度", desc: "彈性時間" });
+                    }
+                }
             }
 
             // 計算最近的倒數計時
